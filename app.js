@@ -93,11 +93,57 @@ function applyTheme(theme) {
   }
 }
 
-document.getElementById("theme-toggle").addEventListener("click", () => {
+const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+/* Elementga animatsiya klassini qaytadan qo'yish (qayta ijro etish uchun) */
+function replay(el, className) {
+  if (!el || reduceMotion) return;
+  el.classList.remove(className);
+  void el.offsetWidth;
+  el.classList.add(className);
+  clearTimeout(el._replayTimer);
+  el._replayTimer = setTimeout(() => el.classList.remove(className), 900);
+}
+
+/* Sahifa yoki panel almashganda kartalar navbat bilan paydo bo'ladi */
+function playEnter(el) {
+  if (!el || reduceMotion) return;
+  el.classList.remove("page-enter");
+  void el.offsetWidth;
+  el.classList.add("page-enter");
+  clearTimeout(el._enterTimer);
+  el._enterTimer = setTimeout(() => el.classList.remove("page-enter"), 700);
+}
+
+document.getElementById("theme-toggle").addEventListener("click", event => {
   const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   writeStorage(themeKey, next);
-  applyTheme(next);
+  if (!document.startViewTransition || reduceMotion) { applyTheme(next); return; }
+  // Yangi mavzu tugmadan aylana bo'lib yoyiladi
+  const rect = event.currentTarget.getBoundingClientRect();
+  const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const root = document.documentElement.style;
+  root.setProperty("--tx", `${x}px`);
+  root.setProperty("--ty", `${y}px`);
+  root.setProperty("--tr", `${radius}px`);
+  document.startViewTransition(() => applyTheme(next));
 });
+
+/* Tugmalarda bosilgan joydan to'lqin tarqaladi */
+document.addEventListener("pointerdown", event => {
+  if (reduceMotion) return;
+  const target = event.target.closest(".key, .op-button, .primary-button, .app-banner-button, .frac-tab, .nav-item");
+  if (!target) return;
+  const rect = target.getBoundingClientRect();
+  const ripple = document.createElement("span");
+  ripple.className = "ripple";
+  ripple.style.left = `${event.clientX - rect.left}px`;
+  ripple.style.top = `${event.clientY - rect.top}px`;
+  ripple.style.setProperty("--size", `${Math.max(rect.width, rect.height) * 2.2}px`);
+  target.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+}, { passive: true });
 
 if (window.matchMedia) {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", event => {
@@ -127,6 +173,8 @@ function render() {
     bmi: renderBmi,
     loan: renderLoan
   })[activePage]();
+  playEnter(workspace);
+  replay(document.querySelector(".page-heading"), "title-enter");
 }
 
 /* =================== KALKULYATOR =================== */
@@ -365,6 +413,7 @@ function calculateAndSave() {
     result.classList.remove("error", "pending");
     result.textContent = parts.main;
     alt.textContent = parts.alt;
+    replay(result, "pop");
     const fraction = M.fractionText(value);
     const answer = parts.main + (fraction && !showFractionFirst && parts.alt ? `  (${fraction.improper})` : "");
     if (historyItems[0]?.expression !== currentExpression) {
@@ -372,6 +421,7 @@ function calculateAndSave() {
       historyItems = historyItems.slice(0, 8);
       saveHistory();
       document.getElementById("history-list").innerHTML = historyMarkup();
+      document.querySelector(".history-entry")?.classList.add("is-new");
     }
     justEvaluated = { expression: currentExpression, value };
   } catch (error) {
@@ -379,6 +429,7 @@ function calculateAndSave() {
     result.classList.add("error");
     result.textContent = error.isMath ? error.message : "Ifodani tekshiring";
     alt.textContent = "";
+    replay(result, "shake");
   }
 }
 
@@ -496,7 +547,7 @@ function decimalExplain(n, d) {
 
 function renderSteps(steps) {
   return `<ol class="steps">${steps.map(([title, body], i) =>
-    `<li><span class="step-index">${i + 1}</span><div><div class="step-title">${title}</div><div class="step-body">${body}</div></div></li>`
+    `<li style="--i:${i}"><span class="step-index">${i + 1}</span><div><div class="step-title">${title}</div><div class="step-body">${body}</div></div></li>`
   ).join("")}</ol>`;
 }
 
@@ -545,6 +596,7 @@ function renderFractions() {
     if (!tab || tab.dataset.ftab === fractionTab) return;
     fractionTab = tab.dataset.ftab;
     renderFractions();
+    playEnter(document.getElementById("frac-panel"));
   });
   ({ ops: renderFracOps, simplify: renderFracSimplify, convert: renderFracConvert, compare: renderFracCompare, practice: renderFracPractice })[fractionTab]();
 }
@@ -594,10 +646,39 @@ function bindFractionInputs(update) {
 function showFracResult(html, stepsHtml, hint) {
   const result = document.getElementById("frac-result");
   const stepsCard = document.getElementById("frac-steps-card");
+  const wasHint = result.classList.contains("is-hint") || !result.innerHTML.trim();
+  const stepsWereHidden = stepsCard.hidden;
   result.classList.toggle("is-hint", Boolean(hint));
   result.innerHTML = hint ? `<div class="frac-hint">${escapeHtml(hint)}</div>` : html;
+  // Javob birinchi marta paydo bo'lganda "sakraydi"; yozish davomida esa tinch turadi
+  if (!hint && wasHint) replay(result, "pop-in");
   stepsCard.hidden = !stepsHtml;
-  if (stepsHtml) document.getElementById("frac-steps").innerHTML = stepsHtml;
+  if (stepsHtml) {
+    const steps = document.getElementById("frac-steps");
+    steps.innerHTML = stepsHtml;
+    steps.classList.toggle("animate-steps", stepsWereHidden && !reduceMotion);
+  }
+}
+
+/* To'g'ri javob uchun kichik konfetti */
+function burstConfetti(anchor) {
+  if (reduceMotion || !anchor) return;
+  const rect = anchor.getBoundingClientRect();
+  const colors = ["#6b8cf6", "#8ff5cf", "#ffd27a", "#ff8f9d", "#a3b8ff"];
+  for (let i = 0; i < 26; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = `${rect.left + rect.width / 2}px`;
+    piece.style.top = `${rect.top + 20}px`;
+    piece.style.background = colors[i % colors.length];
+    const angle = Math.random() * Math.PI * 2, distance = 60 + Math.random() * 120;
+    piece.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+    piece.style.setProperty("--dy", `${Math.sin(angle) * distance - 40}px`);
+    piece.style.setProperty("--rot", `${Math.random() * 720 - 360}deg`);
+    piece.style.animationDelay = `${Math.random() * 80}ms`;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 1300); // animationend fonda kelmasligi mumkin
+  }
 }
 
 /* ----- Amallar: + − × ÷ ----- */
@@ -782,6 +863,8 @@ function checkPractice() {
     if (!practice.answered) { practiceScore.right++; practiceScore.total++; practiceScore.streak++; }
     practice.answered = true;
     showFracResult(`<div class="practice-verdict good">✓ To'g'ri! Barakalla.</div>${resultBlock(solved.sn, solved.sd)}`, "");
+    replay(document.getElementById("frac-result"), "good-glow");
+    burstConfetti(document.getElementById("frac-result"));
     updatePracticeStats();
     document.getElementById("practice-next").focus();
   } else if (correct) {
@@ -789,6 +872,7 @@ function checkPractice() {
   } else {
     if (!practice.answered) { practice.answered = true; practiceScore.total++; practiceScore.streak = 0; }
     revealPractice(`<div class="practice-verdict bad">✗ Noto'g'ri. Siz yozdingiz: ${fracHtml(answer.n, answer.d)}. Quyida to'g'ri yechim:</div>`);
+    replay(document.querySelector(".practice-task"), "shake");
   }
 }
 

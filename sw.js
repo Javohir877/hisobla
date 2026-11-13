@@ -1,6 +1,6 @@
 /* Hisobla — oflayn ishlash uchun service worker.
    Yangi versiya chiqarilganda VERSION ni o'zgartiring. */
-const VERSION = "hisobla-v1";
+const VERSION = "hisobla-v2";
 const FILES = [
   "./",
   "index.html",

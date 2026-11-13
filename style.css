@@ -76,7 +76,6 @@ body {
   line-height: 1.5;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  transition: background-color .2s ease, color .2s ease;
 }
 
 button, input, select { font: inherit; }
@@ -703,7 +702,8 @@ h1 {
 .toast.show { opacity: 1; transform: translateY(0); }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
 }
 
 /* ============ Moslashuvchan dizayn ============ */
@@ -868,4 +868,107 @@ h1 {
   .practice-actions > * { flex: 1 1 auto; }
   .practice-expression { font-size: 21px; }
   body:has(.app-banner.show) .main-footer { padding-bottom: 90px; }
+}
+
+/* ============ Animatsiyalar ============ */
+:root { --ease-out: cubic-bezier(.22, 1, .36, 1); --ease-spring: cubic-bezier(.34, 1.56, .64, 1); }
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { 0% { transform: scale(.94); opacity: .4; } 60% { transform: scale(1.025); opacity: 1; } 100% { transform: none; } }
+@keyframes shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-5px); } 40%, 60% { transform: translateX(5px); } }
+@keyframes ripple { from { opacity: .35; transform: translate(-50%, -50%) scale(0); } to { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
+@keyframes glow-good { 0% { box-shadow: 0 0 0 0 rgba(90, 211, 170, .45); } 100% { box-shadow: 0 0 0 14px rgba(90, 211, 170, 0); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes spin-in { from { transform: rotate(-90deg) scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes confetti { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); } }
+
+/* Sahifa almashganda: kartalar navbat bilan paydo bo'ladi */
+.page-enter > :not(.calc-layout), .page-enter .calc-layout > .calculator-card, .page-enter .right-column > * {
+  animation: fade-up .45s var(--ease-out) both;
+}
+.page-enter .right-column > :nth-child(1) { animation-delay: .07s; }
+.page-enter .right-column > :nth-child(2) { animation-delay: .14s; }
+.page-enter > :nth-child(2) { animation-delay: .06s; }
+.page-enter > :nth-child(3) { animation-delay: .12s; }
+.page-heading.title-enter h1, .page-heading.title-enter .page-description { animation: fade-up .4s var(--ease-out) both; }
+.page-heading.title-enter .page-description { animation-delay: .05s; }
+
+/* Tugmalar: bosilganda to'lqin effekti */
+.key, .op-button, .primary-button, .app-banner-button, .frac-tab, .nav-item { position: relative; overflow: hidden; }
+.ripple {
+  position: absolute;
+  width: var(--size, 120px);
+  height: var(--size, 120px);
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  animation: ripple .5s ease-out forwards;
+}
+.key { transition: transform .12s var(--ease-spring), background .15s, border-color .15s, box-shadow .2s; }
+.key:hover { box-shadow: 0 4px 14px rgba(76, 114, 238, .08); }
+.key:active { transform: scale(.93); }
+.op-button, .chip-button, .frac-tab, .mode-button, .secondary-button, .frac-sign {
+  transition: background .2s, color .2s, border-color .2s, transform .15s var(--ease-spring), box-shadow .2s;
+}
+.op-button:active, .chip-button:active, .frac-tab:active, .mode-button:active, .secondary-button:active, .frac-sign:active { transform: scale(.93); }
+.op-button.active { animation: pop .3s var(--ease-spring); box-shadow: 0 6px 16px rgba(76, 114, 238, .3); }
+.primary-button { transition: filter .15s, transform .15s var(--ease-spring), box-shadow .2s; }
+.primary-button:hover { box-shadow: 0 6px 18px rgba(76, 114, 238, .3); }
+
+/* Natija */
+.calc-result.pop { animation: pop .35s var(--ease-spring); }
+.calc-result.shake, .frac-result.shake, .practice-task.shake { animation: shake .45s ease; }
+.calc-alt { transition: opacity .2s; }
+.frac-result { transition: background .25s, border-color .25s; }
+.frac-result.pop-in { animation: pop .35s var(--ease-out); }
+.frac-answer, .frac-result-main .fx { transition: transform .2s; }
+.fbar span { transition: background .35s var(--ease-out); }
+.fbar span.on { animation: fade-in .4s both; }
+
+/* Yechim qadamlari navbat bilan chiqadi */
+.animate-steps .steps li { animation: fade-up .4s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.steps-card:not([hidden]) { animation: fade-up .4s var(--ease-out) both; }
+
+/* Mashq */
+.practice-verdict { animation: pop .4s var(--ease-spring); }
+.frac-result.good-glow { animation: glow-good .8s ease-out; border-color: var(--success); }
+.confetti-piece {
+  position: fixed;
+  z-index: 9;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: confetti 1s var(--ease-out) forwards;
+}
+
+/* Mavzu tugmasi va logotip */
+.theme-toggle svg { animation: spin-in .45s var(--ease-spring); }
+.brand:hover .brand-mark { animation: float 1.2s ease-in-out infinite; }
+.nav-item .nav-icon { transition: transform .25s var(--ease-spring); }
+.nav-item:hover .nav-icon { transform: scale(1.12); }
+.nav-item.active .nav-icon { transform: scale(1.08); }
+
+/* Tarix */
+.history-entry { animation: fade-up .3s var(--ease-out) both; }
+.history-entry:first-child.is-new { animation: pop .4s var(--ease-spring); }
+
+/* Kartalar: kursor ustida biroz ko'tariladi */
+.tool-card, .history-card { transition: box-shadow .25s, transform .25s var(--ease-out); }
+@media (hover: hover) {
+  .tip-card { transition: transform .25s var(--ease-out); }
+  .tip-card:hover { transform: translateY(-2px); }
+}
+
+/* Toast */
+.toast { transition: opacity .25s, transform .35s var(--ease-spring); transform: translateY(14px) scale(.97); }
+.toast.show { transform: none; }
+
+/* Mavzu almashinuvi: tugmadan aylana shaklida yoyiladi */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: theme-reveal .55s var(--ease-out); }
+@keyframes theme-reveal {
+  from { clip-path: circle(0 at var(--tx, 50%) var(--ty, 0%)); }
+  to { clip-path: circle(var(--tr, 150vmax) at var(--tx, 50%) var(--ty, 0%)); }
 }
