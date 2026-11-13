@@ -1,0 +1,68 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Sayt fayllarini ilovaga nusxalash
+        run: |
+          mkdir -p android/app/src/main/assets/www
+          cp index.html style.css app.js math-core.js avatar.svg avatar.png icon-192.png manifest.webmanifest android/app/src/main/assets/www/
+
+      - name: Imzo kalitini tiklash
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/hisobla.jks"
+            echo "KEYSTORE_PATH=$RUNNER_TEMP/hisobla.jks" >> "$GITHUB_ENV"
+          fi
+
+      - name: APK yig'ish
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          gradle assembleRelease --no-daemon --stacktrace
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/hisobla.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hisobla-apk
+          path: hisobla.apk
+
+      - name: Release'ga joylash
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Hisobla 1.0.${{ github.run_number }}
+          make_latest: true
+          body: |
+            Hisobla Android ilovasi. `hisobla.apk` faylini telefoningizga yuklab oling va o'rnating
+            (birinchi marta "Noma'lum manbalardan o'rnatish"ga ruxsat berish kerak bo'lishi mumkin).
+          files: hisobla.apk
