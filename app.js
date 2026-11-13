@@ -91,6 +91,8 @@ function applyTheme(theme) {
     button.setAttribute("aria-label", dark ? "Yorug' mavzuga o'tish" : "Qora mavzuga o'tish");
     button.title = dark ? "Yorug' mavzu" : "Qora mavzu";
   }
+  // Android ilovada status bar va pastki panel rangini mavzuga moslash
+  try { window.HisoblaNative?.setTheme(theme === "dark"); } catch { /* sayt rejimi */ }
 }
 
 const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -156,12 +158,13 @@ applyTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light")
 /* ---------- Sahifalar ---------- */
 
 function render() {
-  document.querySelectorAll(".nav-item").forEach(button => {
+  document.querySelectorAll(".nav-item, .tab-btn[data-page], .sheet-item[data-page]").forEach(button => {
     const selected = button.dataset.page === activePage;
     button.classList.toggle("active", selected);
     if (selected) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
   });
+  document.querySelector(".tab-btn[data-more]")?.classList.toggle("active", activePage === "bmi" || activePage === "loan");
   document.getElementById("breadcrumb-current").textContent = pageInfo[activePage][0];
   document.getElementById("page-title").textContent = pageInfo[activePage][0];
   document.getElementById("page-description").textContent = pageInfo[activePage][1];
@@ -253,6 +256,8 @@ function renderCalculator() {
     </div>`;
 
   const expression = document.getElementById("expression");
+  // Sensorli ekranda: o'zimizning tugmalar bor — telefon klaviaturasi chiqmasin
+  if (window.matchMedia?.("(pointer: coarse)").matches) expression.setAttribute("inputmode", "none");
   expression.addEventListener("input", () => {
     currentExpression = expression.value;
     justEvaluated = null;
@@ -1337,14 +1342,72 @@ function calculateLoan() {
 
 /* =================== NAVIGATSIYA VA KLAVIATURA =================== */
 
-document.querySelector(".tool-nav").addEventListener("click", event => {
-  const button = event.target.closest(".nav-item");
-  if (!button || button.dataset.page === activePage) return;
-  activePage = button.dataset.page;
+/* Bo'limlar manzil orqali: #fractions, #converter ... — "Orqaga" tugmasi ishlaydi */
+function pageFromHash() {
+  const page = location.hash.slice(1);
+  return page in pageInfo ? page : null;
+}
+
+function showPage(page) {
+  if (!(page in pageInfo)) page = "calculator";
+  closeSheet();
+  if (page === activePage && workspace.childElementCount) return;
+  activePage = page;
   writeStorage(pageKey, activePage);
   render();
   window.scrollTo({ top: 0 });
+}
+
+function navigate(page) {
+  if (page === activePage) { closeSheet(); return; }
+  history.pushState(null, "", `#${page}`);
+  showPage(page);
+}
+
+window.addEventListener("popstate", () => showPage(pageFromHash() || "calculator"));
+
+const sheet = document.getElementById("app-sheet");
+const sheetBackdrop = document.getElementById("app-sheet-backdrop");
+function openSheet() {
+  sheet.hidden = false;
+  sheetBackdrop.hidden = false;
+  void sheet.offsetWidth; // yashirin holatdan chiqqach animatsiya ishlashi uchun
+  setTimeout(() => { sheet.classList.add("open"); sheetBackdrop.classList.add("open"); }, 10);
+}
+function closeSheet() {
+  if (sheet.hidden) return;
+  sheet.classList.remove("open");
+  sheetBackdrop.classList.remove("open");
+  setTimeout(() => { sheet.hidden = true; sheetBackdrop.hidden = true; }, 250);
+}
+sheetBackdrop.addEventListener("click", closeSheet);
+
+document.addEventListener("click", event => {
+  const pageButton = event.target.closest(".tool-nav [data-page], .app-tabbar [data-page], .app-sheet [data-page]");
+  if (pageButton) { navigate(pageButton.dataset.page); return; }
+  if (event.target.closest(".app-tabbar [data-more]")) { sheet.hidden ? openSheet() : closeSheet(); return; }
+  if (event.target.closest('.app-sheet [data-action="theme"]')) {
+    closeSheet();
+    document.getElementById("theme-toggle").click();
+  }
 });
+
+/* Ilova ichida: tugmalar bosilganda yengil tebranish */
+const native = window.HisoblaNative;
+if (native) {
+  document.addEventListener("pointerdown", event => {
+    if (event.target.closest(".key, .op-button, .tab-btn, .frac-tab, .primary-button, .sheet-item, .frac-sign")) {
+      try { native.haptic(); } catch { /* bo'lmasa — jim */ }
+    }
+  }, { passive: true });
+}
+
+// Boshlang'ich bo'lim: manzildagi yoki oxirgi ochilgani
+{
+  const initial = pageFromHash() || activePage;
+  history.replaceState(null, "", `#${initial}`);
+  activePage = initial;
+}
 
 /* =================== ILOVA: o'rnatish va oflayn ishlash =================== */
 

@@ -1,6 +1,6 @@
 /* Hisobla — oflayn ishlash uchun service worker.
    Yangi versiya chiqarilganda VERSION ni o'zgartiring. */
-const VERSION = "hisobla-v2";
+const VERSION = "hisobla-v3";
 const FILES = [
   "./",
   "index.html",
@@ -10,7 +10,9 @@ const FILES = [
   "avatar.svg",
   "avatar.png",
   "icon-192.png",
-  "manifest.webmanifest"
+  "manifest.webmanifest",
+  "fonts/dm-sans.woff2",
+  "fonts/manrope.woff2"
 ];
 
 self.addEventListener("install", event => {

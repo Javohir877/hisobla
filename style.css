@@ -1,3 +1,7 @@
+/* Shriftlar ilova ichida (OFL litsenziya) — internetsiz ham ishlaydi */
+@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 400 700; font-display: swap; src: url("fonts/dm-sans.woff2") format("woff2"); }
+@font-face { font-family: Manrope; font-style: normal; font-weight: 500 800; font-display: swap; src: url("fonts/manrope.woff2") format("woff2"); }
+
 /* ============ Ranglar (yorug' mavzu) ============ */
 :root {
   color-scheme: light;
@@ -972,3 +976,156 @@ h1 {
   from { clip-path: circle(0 at var(--tx, 50%) var(--ty, 0%)); }
   to { clip-path: circle(var(--tr, 150vmax) at var(--tx, 50%) var(--ty, 0%)); }
 }
+
+/* ============ ILOVA REJIMI (Android ilova / o'rnatilgan PWA) ============ */
+.app-tabbar, .app-sheet, .app-sheet-backdrop { display: none; }
+
+.app-mode body {
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.app-mode input, .app-mode .step-body, .app-mode .calc-alt { -webkit-user-select: text; user-select: text; }
+
+/* Sayt elementlari ilovada kerak emas */
+.app-mode .sidebar,
+.app-mode .main-footer,
+.app-mode .online-indicator,
+.app-mode .app-link,
+.app-mode .app-banner,
+.app-mode .page-heading,
+.app-mode .breadcrumb > span,
+.app-mode .tip-card { display: none !important; }
+
+.app-mode .main-content { min-height: 0; margin-left: 0; padding: 0 14px; }
+.app-mode .workspace { padding-top: 12px; }
+
+/* Yuqori panel — ilova sarlavhasi */
+.app-mode .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  height: calc(58px + env(safe-area-inset-top));
+  margin: 0 -14px;
+  padding: env(safe-area-inset-top) 14px 0 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.app-mode .breadcrumb strong {
+  color: var(--ink);
+  font-family: Manrope, sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -.6px;
+}
+.app-mode .theme-toggle { width: 40px; height: 40px; border-radius: 50%; }
+
+/* Kartalar — ilovaga xos yumaloq */
+.app-mode .card { border-radius: 20px; box-shadow: none; }
+.app-mode .calculator-card { padding: 14px 14px 16px; border: 0; background: transparent; }
+.app-mode .calculator-card .card-heading { display: none; }
+.app-mode .calc-screen { min-height: 150px; margin-top: 0; border: 0; border-radius: 22px; background: var(--surface); }
+.app-mode .calc-expression { font-size: 22px; }
+.app-mode .calc-result { font-size: 44px; }
+.app-mode .keypad { gap: 10px; }
+.app-mode .key { min-height: 62px; border: 0; border-radius: 18px; font-size: 22px; background: var(--surface); }
+.app-mode .key.function { background: var(--surface-2); }
+.app-mode .key.operator { background: var(--accent-soft); font-size: 24px; }
+.app-mode .key.equals { min-height: 58px; background: var(--accent); font-size: 26px; }
+.app-mode .calc-layout { gap: 12px; }
+.app-mode .history-card { margin-bottom: 4px; }
+.app-mode .tool-card { padding: 18px 16px; }
+.app-mode .frac-tabs { position: sticky; top: calc(66px + env(safe-area-inset-top)); z-index: 3; border-radius: 16px; }
+
+/* Pastki navigatsiya (Material uslubida) */
+.app-mode .app-tabbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: calc(70px + env(safe-area-inset-bottom));
+  padding: 6px 4px env(safe-area-inset-bottom);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.tab-btn {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.tab-icon {
+  display: grid;
+  width: 58px;
+  height: 30px;
+  place-items: center;
+  border-radius: 15px;
+  transition: background .25s var(--ease-out), color .25s, transform .2s var(--ease-spring);
+}
+.tab-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.tab-icon circle { fill: currentColor; }
+.tab-btn[data-page="percent"] .tab-icon circle, .tab-btn[data-page="calculator"] .tab-icon rect { fill: none; }
+.tab-btn.active { color: var(--accent-strong); }
+.tab-btn.active .tab-icon { background: var(--accent-soft); animation: pop .3s var(--ease-spring); }
+.tab-btn:active .tab-icon { transform: scale(.9); }
+
+/* "Yana" — pastdan chiquvchi oyna */
+.app-mode .app-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+  display: block;
+  background: rgba(0, 0, 0, .45);
+  opacity: 0;
+  transition: opacity .25s;
+}
+.app-mode .app-sheet-backdrop.open { opacity: 1; }
+.app-mode .app-sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 8;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
+  background: var(--surface);
+  transform: translateY(100%);
+  transition: transform .3s var(--ease-out);
+}
+.app-mode .app-sheet.open { transform: none; }
+.app-mode .app-sheet[hidden], .app-mode .app-sheet-backdrop[hidden] { display: none !important; }
+.sheet-handle { width: 40px; height: 4px; margin: 0 auto 10px; border-radius: 2px; background: var(--border-strong); }
+.sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+.sheet-item:active, .sheet-item.active { background: var(--accent-soft); }
+.sheet-item strong { display: block; font-size: 15px; }
+.sheet-item small { color: var(--muted); font-size: 12.5px; }
+.sheet-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; background: var(--surface-2); color: var(--accent-strong); font-size: 20px; }
+
+/* Toast pastki panel ustida chiqsin */
+.app-mode .toast { right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); left: 16px; max-width: none; text-align: center; }
