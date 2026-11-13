@@ -15,12 +15,15 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <script>
       (function () {
+        var schemes = { light: "light", dark: "dark", amoled: "dark", ocean: "dark", forest: "dark",
+          grape: "dark", sunset: "light", rose: "light", mint: "light" };
         var t = null;
         try { t = localStorage.getItem("hisobla-theme"); } catch (e) {}
-        if (t !== "light" && t !== "dark") {
+        if (!schemes[t]) {
           t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         }
         document.documentElement.dataset.theme = t;
+        document.documentElement.dataset.scheme = schemes[t];
         // Android ilova ichida yoki o'rnatilgan (PWA) holatda — ilova ko'rinishi
         var app = /HisoblaApp/.test(navigator.userAgent) ||
           (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
@@ -145,7 +148,7 @@
       <div class="sheet-handle" aria-hidden="true"></div>
       <button type="button" class="sheet-item" data-page="bmi"><span class="sheet-icon">♡</span><span><strong>Tana massasi (BMI)</strong><small>Vazn va bo'y bo'yicha</small></span></button>
       <button type="button" class="sheet-item" data-page="loan"><span class="sheet-icon">▤</span><span><strong>Kredit kalkulyatori</strong><small>Oylik to'lov va jadval</small></span></button>
-      <button type="button" class="sheet-item" data-action="theme"><span class="sheet-icon">◐</span><span><strong>Mavzuni almashtirish</strong><small>Qora / yorug'</small></span></button>
+      <button type="button" class="sheet-item" data-action="theme"><span class="sheet-icon">◐</span><span><strong>Rang mavzusi</strong><small>9 xil rang — o'zingizga yoqqanini tanlang</small></span></button>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </body>

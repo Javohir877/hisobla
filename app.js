@@ -80,19 +80,45 @@ function escapeHtml(value) {
 
 /* ---------- Mavzu (yorug' / qora) ---------- */
 
+/* Rang mavzulari: [nomi, sxema, fon, karta, asosiy rang] — CSS'dagi qiymatlar bilan bir xil */
+const THEMES = {
+  light:  ["Yorug'",    "light", "#f5f7fb", "#ffffff", "#4c72ee"],
+  dark:   ["Qora",      "dark",  "#121214", "#1b1b1f", "#6b8cf6"],
+  amoled: ["Qop-qora",  "dark",  "#000000", "#0c0c0e", "#6b8cf6"],
+  ocean:  ["Okean",     "dark",  "#0a1520", "#101f2d", "#3ea8e5"],
+  forest: ["O'rmon",    "dark",  "#0c1410", "#131f19", "#2fb57a"],
+  grape:  ["Binafsha",  "dark",  "#120f1b", "#1b1727", "#9476f4"],
+  sunset: ["Shaftoli",  "light", "#fbf4ee", "#fffdfb", "#e5652f"],
+  rose:   ["Pushti",    "light", "#fbf2f5", "#ffffff", "#d6457b"],
+  mint:   ["Yalpiz",    "light", "#f0f7f4", "#ffffff", "#14a06b"]
+};
+
+function systemTheme() {
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function savedTheme() {
+  const saved = readStorage(themeKey);
+  return saved in THEMES ? saved : "auto";
+}
+
 function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme;
+  if (!(theme in THEMES)) theme = systemTheme();
+  const [, scheme, bg, surface] = THEMES[theme];
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  root.dataset.scheme = scheme;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = theme === "dark" ? "#121214" : "#f5f7fb";
+  if (meta) meta.content = bg;
   const button = document.getElementById("theme-toggle");
   if (button) {
-    const dark = theme === "dark";
-    button.setAttribute("aria-pressed", String(dark));
-    button.setAttribute("aria-label", dark ? "Yorug' mavzuga o'tish" : "Qora mavzuga o'tish");
-    button.title = dark ? "Yorug' mavzu" : "Qora mavzu";
+    button.setAttribute("aria-label", `Rang mavzusi: ${THEMES[theme][0]}`);
+    button.title = "Rang mavzusini tanlash";
   }
   // Android ilovada status bar va pastki panel rangini mavzuga moslash
-  try { window.HisoblaNative?.setTheme(theme === "dark"); } catch { /* sayt rejimi */ }
+  try {
+    if (window.HisoblaNative?.setBars) window.HisoblaNative.setBars(bg, surface, scheme === "dark");
+    else window.HisoblaNative?.setTheme(scheme === "dark");
+  } catch { /* sayt rejimi */ }
 }
 
 const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -117,20 +143,77 @@ function playEnter(el) {
   el._enterTimer = setTimeout(() => el.classList.remove("page-enter"), 700);
 }
 
-document.getElementById("theme-toggle").addEventListener("click", event => {
-  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  writeStorage(themeKey, next);
-  if (!document.startViewTransition || reduceMotion) { applyTheme(next); return; }
-  // Yangi mavzu tugmadan aylana bo'lib yoyiladi
-  const rect = event.currentTarget.getBoundingClientRect();
+/* Mavzuni almashtirish: yangi rang bosilgan joydan aylana bo'lib yoyiladi */
+function switchTheme(choice, originEl) {
+  if (choice === "auto") { try { localStorage.removeItem(themeKey); } catch { /* jim */ } }
+  else writeStorage(themeKey, choice);
+  const next = choice === "auto" ? systemTheme() : choice;
+  if (next === document.documentElement.dataset.theme) { markThemeChoice(); return; }
+  if (!document.startViewTransition || reduceMotion || !originEl) { applyTheme(next); markThemeChoice(); return; }
+  const rect = originEl.getBoundingClientRect();
   const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2;
   const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-  const root = document.documentElement.style;
-  root.setProperty("--tx", `${x}px`);
-  root.setProperty("--ty", `${y}px`);
-  root.setProperty("--tr", `${radius}px`);
-  document.startViewTransition(() => applyTheme(next));
-});
+  const style = document.documentElement.style;
+  style.setProperty("--tx", `${x}px`);
+  style.setProperty("--ty", `${y}px`);
+  style.setProperty("--tr", `${radius}px`);
+  document.startViewTransition(() => { applyTheme(next); markThemeChoice(); });
+}
+
+let themePicker = null, themeBackdrop = null;
+
+function markThemeChoice() {
+  if (!themePicker) return;
+  const current = savedTheme();
+  themePicker.querySelectorAll("[data-theme-choice]").forEach(option => {
+    const active = option.dataset.themeChoice === current;
+    option.classList.toggle("active", active);
+    option.setAttribute("aria-checked", String(active));
+  });
+}
+
+function openThemePicker() {
+  if (!themePicker) {
+    themeBackdrop = document.createElement("div");
+    themeBackdrop.className = "theme-backdrop";
+    themePicker = document.createElement("div");
+    themePicker.className = "theme-picker";
+    themePicker.setAttribute("role", "dialog");
+    themePicker.setAttribute("aria-label", "Rang mavzusi");
+    const option = (key, name, swatch) =>
+      `<button type="button" class="theme-option" role="radio" data-theme-choice="${key}">${swatch}<span>${name}</span></button>`;
+    themePicker.innerHTML = `
+      <h3>Rang mavzusi</h3>
+      <p>O'zingizga yoqqan rangni tanlang — eslab qolinadi.</p>
+      <div class="theme-grid" role="radiogroup">
+        ${option("auto", "Avtomatik", '<span class="theme-swatch auto"></span>')}
+        ${Object.entries(THEMES).map(([key, [name, , bg, surface, accent]]) =>
+          option(key, name, `<span class="theme-swatch" style="--sw-bg:${bg};--sw-surface:${surface};--sw-accent:${accent}"></span>`)).join("")}
+      </div>`;
+    document.body.append(themeBackdrop, themePicker);
+    themeBackdrop.addEventListener("click", closeThemePicker);
+    themePicker.addEventListener("click", event => {
+      const choice = event.target.closest("[data-theme-choice]");
+      if (choice) switchTheme(choice.dataset.themeChoice, choice.querySelector(".theme-swatch"));
+    });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeThemePicker(); });
+  }
+  markThemeChoice();
+  themeBackdrop.hidden = false;
+  themePicker.hidden = false;
+  void themePicker.offsetWidth;
+  setTimeout(() => { themeBackdrop.classList.add("open"); themePicker.classList.add("open"); }, 10);
+  themePicker.querySelector(".theme-option.active, .theme-option")?.focus({ preventScroll: true });
+}
+
+function closeThemePicker() {
+  if (!themePicker || themePicker.hidden) return;
+  themeBackdrop.classList.remove("open");
+  themePicker.classList.remove("open");
+  setTimeout(() => { themeBackdrop.hidden = true; themePicker.hidden = true; }, 250);
+}
+
+document.getElementById("theme-toggle").addEventListener("click", openThemePicker);
 
 /* Tugmalarda bosilgan joydan to'lqin tarqaladi */
 document.addEventListener("pointerdown", event => {
@@ -149,11 +232,10 @@ document.addEventListener("pointerdown", event => {
 
 if (window.matchMedia) {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", event => {
-    const saved = readStorage(themeKey);
-    if (saved !== "light" && saved !== "dark") applyTheme(event.matches ? "dark" : "light");
+    if (savedTheme() === "auto") { applyTheme(event.matches ? "dark" : "light"); markThemeChoice(); }
   });
 }
-applyTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+applyTheme(savedTheme() === "auto" ? systemTheme() : savedTheme());
 
 /* ---------- Sahifalar ---------- */
 
@@ -386,11 +468,23 @@ function resultParts(value) {
     : { main: decimal, alt: `Kasr: ${fracLabel}${repeating.includes("(") ? ` · ${repeating}` : ""}` };
 }
 
+/* Uzun natija ekranga sig'ishi uchun shriftni kichraytiramiz (kesilib qolmasin) */
+function fitResult(result) {
+  result.style.fontSize = "";
+  if (result.classList.contains("error")) return;
+  let size = parseFloat(getComputedStyle(result).fontSize);
+  while (result.scrollWidth > result.clientWidth + 1 && size > 18) {
+    size -= 2;
+    result.style.fontSize = `${size}px`;
+  }
+}
+
 function calculatePreview() {
   const result = document.getElementById("calc-result");
   const alt = document.getElementById("calc-alt");
   if (!result) return;
   result.classList.remove("error", "pending");
+  result.style.fontSize = "";
   if (!currentExpression.trim()) {
     result.textContent = "0";
     alt.textContent = "";
@@ -400,6 +494,7 @@ function calculatePreview() {
     const parts = resultParts(M.evaluate(currentExpression, degreesMode));
     result.textContent = parts.main;
     alt.textContent = parts.alt;
+    fitResult(result);
   } catch (error) {
     // Yozish davom etayotgan bo'lishi mumkin — xatoni yumshoq ko'rsatamiz
     result.classList.add("pending");
@@ -418,6 +513,7 @@ function calculateAndSave() {
     result.classList.remove("error", "pending");
     result.textContent = parts.main;
     alt.textContent = parts.alt;
+    fitResult(result);
     replay(result, "pop");
     const fraction = M.fractionText(value);
     const answer = parts.main + (fraction && !showFractionFirst && parts.alt ? `  (${fraction.improper})` : "");
@@ -432,6 +528,7 @@ function calculateAndSave() {
   } catch (error) {
     result.classList.remove("pending");
     result.classList.add("error");
+    result.style.fontSize = "";
     result.textContent = error.isMath ? error.message : "Ifodani tekshiring";
     alt.textContent = "";
     replay(result, "shake");

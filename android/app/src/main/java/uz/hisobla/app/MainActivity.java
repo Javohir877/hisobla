@@ -79,11 +79,16 @@ public class MainActivity extends Activity {
     }
 
     /** Status bar va pastki tizim paneli rangini mavzuga moslash. */
-    @SuppressWarnings("deprecation")
     private void applyBars(boolean dark) {
+        applyBars(dark ? 0xFF121214 : 0xFFF5F7FB, dark ? 0xFF1B1B1F : 0xFFFFFFFF, dark);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void applyBars(int statusColor, int navColor, boolean dark) {
         Window window = getWindow();
-        window.setStatusBarColor(dark ? 0xFF121214 : 0xFFF5F7FB);
-        window.setNavigationBarColor(dark ? 0xFF1B1B1F : 0xFFFFFFFF);
+        window.setStatusBarColor(statusColor);
+        window.setNavigationBarColor(navColor);
+        if (web != null) web.setBackgroundColor(statusColor);
         View decor = window.getDecorView();
         int flags = decor.getSystemUiVisibility();
         if (Build.VERSION.SDK_INT >= 23) {
@@ -105,6 +110,18 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setTheme(final boolean dark) {
             runOnUiThread(() -> applyBars(dark));
+        }
+
+        /** Har bir rang mavzusi uchun aniq ranglar: "#0a1520" kabi. */
+        @JavascriptInterface
+        public void setBars(final String status, final String nav, final boolean dark) {
+            runOnUiThread(() -> {
+                try {
+                    applyBars(Color.parseColor(status), Color.parseColor(nav), dark);
+                } catch (IllegalArgumentException e) {
+                    applyBars(dark);
+                }
+            });
         }
     }
 
