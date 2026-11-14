@@ -1,6 +1,6 @@
 /* Shriftlar ilova ichida (OFL litsenziya) — internetsiz ham ishlaydi */
-@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 400 700; font-display: swap; src: url("fonts/dm-sans.woff2") format("woff2"); }
-@font-face { font-family: Manrope; font-style: normal; font-weight: 500 800; font-display: swap; src: url("fonts/manrope.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 400 700; font-display: swap; src: url("./fonts/dm-sans.woff2") format("woff2"); }
+@font-face { font-family: Manrope; font-style: normal; font-weight: 500 800; font-display: swap; src: url("./fonts/manrope.woff2") format("woff2"); }
 
 /* ============ Ranglar (yorug' mavzu) ============ */
 :root {
@@ -1036,7 +1036,6 @@ h1 {
 .app-mode .key.operator { background: var(--accent-soft); font-size: 24px; }
 .app-mode .key.equals { min-height: 58px; background: var(--accent); font-size: 26px; }
 .app-mode .calc-layout { gap: 12px; }
-.app-mode .history-card { margin-bottom: 4px; }
 .app-mode .tool-card { padding: 18px 16px; }
 .app-mode .frac-tabs { position: sticky; top: calc(66px + env(safe-area-inset-top)); z-index: 3; border-radius: 16px; }
 
@@ -1076,56 +1075,9 @@ h1 {
   transition: background .25s var(--ease-out), color .25s, transform .2s var(--ease-spring);
 }
 .tab-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.tab-icon circle { fill: currentColor; }
-.tab-btn[data-page="percent"] .tab-icon circle, .tab-btn[data-page="calculator"] .tab-icon rect { fill: none; }
 .tab-btn.active { color: var(--accent-strong); }
 .tab-btn.active .tab-icon { background: var(--accent-soft); animation: pop .3s var(--ease-spring); }
 .tab-btn:active .tab-icon { transform: scale(.9); }
-
-/* "Yana" — pastdan chiquvchi oyna */
-.app-mode .app-sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 7;
-  display: block;
-  background: rgba(0, 0, 0, .45);
-  opacity: 0;
-  transition: opacity .25s;
-}
-.app-mode .app-sheet-backdrop.open { opacity: 1; }
-.app-mode .app-sheet {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 8;
-  display: grid;
-  gap: 4px;
-  padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
-  border-radius: 24px 24px 0 0;
-  background: var(--surface);
-  transform: translateY(100%);
-  transition: transform .3s var(--ease-out);
-}
-.app-mode .app-sheet.open { transform: none; }
-.app-mode .app-sheet[hidden], .app-mode .app-sheet-backdrop[hidden] { display: none !important; }
-.sheet-handle { width: 40px; height: 4px; margin: 0 auto 10px; border-radius: 2px; background: var(--border-strong); }
-.sheet-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px;
-  border: 0;
-  border-radius: 14px;
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-  text-align: left;
-}
-.sheet-item:active, .sheet-item.active { background: var(--accent-soft); }
-.sheet-item strong { display: block; font-size: 15px; }
-.sheet-item small { color: var(--muted); font-size: 12.5px; }
-.sheet-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; background: var(--surface-2); color: var(--accent-strong); font-size: 20px; }
 
 /* Toast pastki panel ustida chiqsin */
 .app-mode .toast { right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); left: 16px; max-width: none; text-align: center; }
@@ -1180,35 +1132,6 @@ h1 {
   --accent-line: #b2e2cb; --accent-ring: rgba(20, 160, 107, .26); --fbar-off: #d7e9e0; --pending: #a6bcb1;
 }
 
-/* ============ Mavzu tanlash oynasi ============ */
-.theme-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 9;
-  background: rgba(0, 0, 0, .4);
-  opacity: 0;
-  transition: opacity .2s;
-}
-.theme-backdrop.open { opacity: 1; }
-.theme-picker {
-  position: fixed;
-  top: 70px;
-  right: max(16px, calc((100vw - 1035px - 252px) / 2 + 16px));
-  z-index: 10;
-  width: min(400px, calc(100vw - 24px));
-  padding: 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: 20px;
-  background: var(--surface);
-  box-shadow: var(--shadow-pop);
-  opacity: 0;
-  transform: translateY(-8px) scale(.97);
-  transform-origin: top right;
-  transition: opacity .2s, transform .25s var(--ease-spring);
-}
-.theme-picker.open { opacity: 1; transform: none; }
-.theme-picker h3 { margin: 0 0 4px; font-family: Manrope, sans-serif; font-size: 16px; }
-.theme-picker p { margin: 0 0 14px; color: var(--muted); font-size: 12.5px; }
 .theme-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .theme-option {
   display: grid;
@@ -1257,27 +1180,7 @@ h1 {
 .theme-swatch.auto::before { display: none; }
 .theme-option.active .theme-swatch { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
 
-@media (max-width: 620px) {
-  .theme-picker {
-    top: auto;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: auto;
-    padding: 18px 16px calc(20px + env(safe-area-inset-bottom));
-    border-radius: 24px 24px 0 0;
-    transform: translateY(100%);
-    transform-origin: bottom;
-  }
-  .theme-picker.open { transform: none; }
-}
-.app-mode .theme-picker {
-  top: auto; right: 0; bottom: 0; left: 0; width: auto;
-  padding: 18px 16px calc(20px + env(safe-area-inset-bottom));
-  border-radius: 24px 24px 0 0;
-  transform: translateY(100%);
-}
-.app-mode .theme-picker.open { transform: none; }
+
 
 /* ============ ILOVA QOBIG'I: Asosiy, Sozlamalar, tarix ============ */
 .app-only, .app-back { display: none; }
@@ -1304,7 +1207,7 @@ h1 {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: url("avatar.svg") center / cover;
+  background: url("./avatar.svg") center / cover;
 }
 
 /* Asosiy sahifa */
@@ -1509,3 +1412,103 @@ h1 {
 .app-mode .calc-screen { flex: 1 1 auto; min-height: 120px; margin-bottom: 12px; }
 .app-mode .calc-actions { margin-bottom: 10px; }
 .app-mode .calc-actions-right { gap: 8px; }
+
+/* ============ REACT VERSIYASI: pastki oyna, ikonkalar, natija o'lchami ============ */
+
+/* Pastdan chiquvchi oyna (tarix, tasdiqlash, mavzu, yangilanish) — ochilish/yopilish faqat CSS */
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes sheet-down { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes popover-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } to { opacity: 1; transform: none; } }
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: rgba(0, 0, 0, .45);
+  animation: fade-in .25s both;
+}
+.sheet-backdrop.closing { animation: fade-out .22s both; }
+.sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  max-height: 88dvh;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  border-radius: 24px 24px 0 0;
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+  animation: sheet-up .32s var(--ease-out) both;
+}
+.sheet.closing { animation: sheet-down .22s ease-in both; }
+.sheet-title { margin: 4px 0 4px; font-family: Manrope, sans-serif; font-size: 17px; }
+.sheet-subtitle { margin: 0 0 14px; color: var(--muted); font-size: 12.5px; }
+
+/* Kompyuterda mavzu tanlash — yuqori o'ng burchakda kichik oyna */
+@media (min-width: 621px) {
+  html:not(.app-mode) .sheet.theme-sheet {
+    top: 70px;
+    right: max(16px, calc((100vw - 1035px - 252px) / 2 + 16px));
+    bottom: auto;
+    left: auto;
+    width: min(400px, calc(100vw - 24px));
+    padding: 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 20px;
+    transform-origin: top right;
+    animation: popover-in .25s var(--ease-spring) both;
+  }
+  html:not(.app-mode) .sheet.theme-sheet.closing { animation: fade-out .18s both; }
+  html:not(.app-mode) .sheet.theme-sheet .sheet-handle { display: none; }
+}
+
+/* Yon menyu ikonkalari endi SVG */
+.nav-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Telefonda "Ilovani yuklab oling" paneli — paydo bo'lish animatsiyasi */
+@keyframes banner-in { from { opacity: 0; transform: translateY(120%); } to { opacity: 1; transform: none; } }
+.app-banner.show { animation: banner-in .4s var(--ease-spring) both; }
+
+/* Natija ekranga sig'adi: belgilar soniga qarab shrift kichrayadi (JavaScript'siz, container query) */
+.calc-screen { container-type: inline-size; }
+.calc-result:not(.error) {
+  font-size: min(clamp(27px, 4vw, 36px), calc(100cqw / (var(--len, 1) * .62)));
+}
+.app-mode .calc-result:not(.error) { font-size: min(44px, calc(100cqw / (var(--len, 1) * .62))); }
+
+/* Yangilanish oynasi */
+.update-sheet { display: grid; justify-items: center; padding: 6px 4px 2px; text-align: center; }
+.update-badge {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+  place-items: center;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #8b5cf6));
+  color: #fff;
+  font-size: 30px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 35%, transparent);
+  animation: pop .5s var(--ease-spring);
+}
+.update-sheet h3 { margin: 0 0 4px; font-family: Manrope, sans-serif; font-size: 20px; }
+.update-version { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+.update-version b { color: var(--accent-strong); }
+.update-notes {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  text-align: left;
+}
+.update-notes strong { font-size: 13px; }
+.update-notes ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 13px; line-height: 1.55; }
+.update-hint { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.update-sheet .confirm-actions { width: 100%; }

@@ -1,23 +1,11 @@
 /* Hisobla — oflayn ishlash uchun service worker.
-   Yangi versiya chiqarilganda VERSION ni o'zgartiring. */
-const VERSION = "hisobla-v5";
-const FILES = [
-  "./",
-  "index.html",
-  "style.css",
-  "math-core.js",
-  "app.js",
-  "app-shell.js",
-  "avatar.svg",
-  "avatar.png",
-  "icon-192.png",
-  "manifest.webmanifest",
-  "fonts/dm-sans.woff2",
-  "fonts/manrope.woff2"
-];
+   Vite fayl nomlariga xesh qo'shadi (index-AbC123.js), shuning uchun ularni ro'yxatda emas,
+   birinchi ochilganda keshga olamiz. Yangi versiya chiqarilganda VERSION ni o'zgartiring. */
+const VERSION = "hisobla-v6";
+const CORE = ["./", "index.html", "avatar.svg", "avatar.png", "icon-192.png", "manifest.webmanifest"];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", event => {
@@ -38,10 +26,9 @@ self.addEventListener("fetch", event => {
       if (response.ok) cache.put(request, response.clone());
       return response;
     });
-    const cached = cache.match(request, { ignoreSearch: true });
     const timeout = new Promise(resolve => setTimeout(resolve, 2500));
     const fast = await Promise.race([network.catch(() => null), timeout]);
     if (fast) return fast;
-    return (await cached) || network;
+    return (await cache.match(request, { ignoreSearch: true })) || network;
   })());
 });

@@ -439,11 +439,17 @@ function primeFactors(a) {
   return out;
 }
 
-const MathCore = {
+export const MathCore = {
   mathError, bAbs, bGcd, bLcm, rat, flt, toNum, isZero, isInt,
   add, sub, mul, div, neg, pow, parseDecimal, decimalExpansion,
   formatValue, formatExact, formatFloat, formatRepeating, fractionText,
   groupInt, evaluate, valueToExpression, primeFactors, DEC_SEP, SUPERSCRIPT
 };
 
-if (typeof module !== "undefined") module.exports = MathCore;
+export default MathCore;
+export {
+  mathError, bAbs, bGcd, bLcm, rat, flt, toNum, isZero, isInt,
+  add, sub, mul, div, neg, pow, parseDecimal, decimalExpansion,
+  formatValue, formatExact, formatFloat, formatRepeating, fractionText,
+  groupInt, evaluate, valueToExpression, primeFactors, DEC_SEP, SUPERSCRIPT
+};

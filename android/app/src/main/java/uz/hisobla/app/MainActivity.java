@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
     private static final String START_URL = "https://" + HOST + "/assets/www/index.html";
 
     private WebView web;
+    private final UpdateInstaller updates = new UpdateInstaller(this, this::reportUpdate);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +152,23 @@ public class MainActivity extends Activity {
                 }
             });
         }
+
+        /** "Yangilash" bosilganda: yangi APK ilovaning o'zida yuklanadi va o'rnatiladi. */
+        @JavascriptInterface
+        public void downloadUpdate(final String url) {
+            runOnUiThread(() -> updates.download(url));
+        }
+    }
+
+    /** Yangilanish holatini sahifaga xabar qilamiz (toast ko'rsatadi). */
+    private void reportUpdate(String status) {
+        if (web != null) web.evaluateJavascript("window.hisoblaUpdateStatus && window.hisoblaUpdateStatus('" + status + "')", null);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updates.onResume();
     }
 
     @Override
@@ -168,6 +186,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        updates.release();
         if (web != null) web.destroy();
         super.onDestroy();
     }

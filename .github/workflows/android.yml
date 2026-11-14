@@ -19,6 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Saytni yig'ish (React + Vite) va testlar
+        run: |
+          npm ci
+          npm test
+          npm run build
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -28,10 +39,10 @@ jobs:
         with:
           gradle-version: "8.7"
 
-      - name: Sayt fayllarini ilovaga nusxalash
+      - name: Yig'ilgan saytni ilovaga nusxalash
         run: |
           mkdir -p android/app/src/main/assets/www
-          cp -r index.html style.css app.js app-shell.js math-core.js avatar.svg avatar.png icon-192.png manifest.webmanifest fonts android/app/src/main/assets/www/
+          cp -r dist/. android/app/src/main/assets/www/
 
       - name: Imzo kalitini tiklash
         env:
@@ -56,6 +67,7 @@ jobs:
           name: hisobla-apk
           path: hisobla.apk
 
+      # Reliz matnining "---" gacha qismi ilovadagi "Nimalar yangi" oynasida ko'rinadi
       - name: Release'ga joylash
         uses: softprops/action-gh-release@v2
         with:
@@ -63,6 +75,9 @@ jobs:
           name: Hisobla 1.0.${{ github.run_number }}
           make_latest: true
           body: |
-            Hisobla Android ilovasi. `hisobla.apk` faylini telefoningizga yuklab oling va o'rnating
-            (birinchi marta "Noma'lum manbalardan o'rnatish"ga ruxsat berish kerak bo'lishi mumkin).
+            ${{ github.event.head_commit.message }}
+
+            ---
+            Hisobla Android ilovasi. Ilovaning o'zi yangi versiya chiqqanini xabar qiladi va yangilaydi.
+            Birinchi marta o'rnatish uchun `hisobla.apk` faylini yuklab oling ("Noma'lum manbalardan o'rnatish"ga ruxsat bering).
           files: hisobla.apk
