@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hisobla</string>
+    <string name="sc_calc_short">Kalkulyator</string>
+    <string name="sc_calc_long">Kalkulyatorni ochish</string>
+    <string name="sc_frac_short">Kasrlar</string>
+    <string name="sc_frac_long">Kasrlar bilan amallar</string>
+    <string name="sc_practice_short">Mashq</string>
+    <string name="sc_practice_long">Kasrlar mashqi</string>
+    <string name="sc_convert_short">Konvertor</string>
+    <string name="sc_convert_long">Birliklarni o&#39;tkazish</string>
+</resources>

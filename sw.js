@@ -1,12 +1,13 @@
 /* Hisobla — oflayn ishlash uchun service worker.
    Yangi versiya chiqarilganda VERSION ni o'zgartiring. */
-const VERSION = "hisobla-v4";
+const VERSION = "hisobla-v5";
 const FILES = [
   "./",
   "index.html",
   "style.css",
   "math-core.js",
   "app.js",
+  "app-shell.js",
   "avatar.svg",
   "avatar.png",
   "icon-192.png",

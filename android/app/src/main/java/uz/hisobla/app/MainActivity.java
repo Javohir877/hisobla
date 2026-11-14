@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setTextZoom(100);              // telefon shrift o'lchami dizaynni buzmasin
         settings.setSupportZoom(false);
-        settings.setUserAgentString(settings.getUserAgentString() + " HisoblaApp");
+        settings.setUserAgentString(settings.getUserAgentString() + " HisoblaApp/" + versionName());
 
         web.addJavascriptInterface(new NativeBridge(), "HisoblaNative");
         web.setWebViewClient(new WebViewClient() {
@@ -67,7 +67,35 @@ public class MainActivity extends Activity {
 
         setContentView(web);
         if (savedInstanceState != null) web.restoreState(savedInstanceState);
-        else web.loadUrl(START_URL);
+        else {
+            String page = pageFromIntent(getIntent());
+            web.loadUrl(page == null ? START_URL : START_URL + "#" + page);
+        }
+    }
+
+    /** Tezkor yorliq (hisobla://open/fractions) qaysi bo'limni ochishini aniqlaydi. */
+    private static String pageFromIntent(Intent intent) {
+        if (intent == null || intent.getData() == null) return null;
+        String page = intent.getData().getLastPathSegment();
+        return page != null && page.matches("[a-z]{2,20}") ? page : null;
+    }
+
+    /** Ilova ochiq turganda yorliq bosilsa — sahifani qayta yuklamay, bo'limga o'tamiz. */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String page = pageFromIntent(intent);
+        if (page != null && web != null) {
+            web.evaluateJavascript("window.hisoblaOpen && window.hisoblaOpen('" + page + "')", null);
+        }
+    }
+
+    private String versionName() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "1.0";
+        }
     }
 
     private void openExternal(Uri uri) {

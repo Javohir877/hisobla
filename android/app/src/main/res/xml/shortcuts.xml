@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ilova ikonkasini bosib turganda chiqadigan tezkor yorliqlar -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="calculator"
+        android:shortcutLongLabel="@string/sc_calc_long"
+        android:shortcutShortLabel="@string/sc_calc_short">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hisobla://open/calculator"
+            android:targetClass="uz.hisobla.app.MainActivity"
+            android:targetPackage="uz.hisobla.app" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="fractions"
+        android:shortcutLongLabel="@string/sc_frac_long"
+        android:shortcutShortLabel="@string/sc_frac_short">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hisobla://open/fractions"
+            android:targetClass="uz.hisobla.app.MainActivity"
+            android:targetPackage="uz.hisobla.app" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="practice"
+        android:shortcutLongLabel="@string/sc_practice_long"
+        android:shortcutShortLabel="@string/sc_practice_short">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hisobla://open/practice"
+            android:targetClass="uz.hisobla.app.MainActivity"
+            android:targetPackage="uz.hisobla.app" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="converter"
+        android:shortcutLongLabel="@string/sc_convert_long"
+        android:shortcutShortLabel="@string/sc_convert_short">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hisobla://open/converter"
+            android:targetClass="uz.hisobla.app.MainActivity"
+            android:targetPackage="uz.hisobla.app" />
+    </shortcut>
+</shortcuts>

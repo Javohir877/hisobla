@@ -1278,3 +1278,234 @@ h1 {
   transform: translateY(100%);
 }
 .app-mode .theme-picker.open { transform: none; }
+
+/* ============ ILOVA QOBIG'I: Asosiy, Sozlamalar, tarix ============ */
+.app-only, .app-back { display: none; }
+.app-mode .app-only { display: inline-flex; }
+.app-mode .app-back:not([hidden]) {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  margin-left: -10px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.app-mode .app-back:active { background: var(--surface-2); }
+.app-mode .topbar { justify-content: flex-start; gap: 6px; }
+.app-mode .topbar-right { margin-left: auto; }
+/* Asosiy sahifada sarlavha yonida logotip */
+.app-mode[data-page="home"] .breadcrumb strong { display: flex; align-items: center; gap: 9px; }
+.app-mode[data-page="home"] .breadcrumb strong::before {
+  content: "";
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: url("avatar.svg") center / cover;
+}
+
+/* Asosiy sahifa */
+.home-hero {
+  margin: 6px 0 22px;
+  padding: 20px 18px 18px;
+  border: 1px solid var(--accent-line);
+  border-radius: 24px;
+  background:
+    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 60%),
+    linear-gradient(160deg, var(--accent-soft), var(--surface));
+}
+.home-greet { margin: 0 0 4px; color: var(--accent-strong); font-size: 13px; font-weight: 700; }
+.home-hero h2 { margin: 0 0 16px; font-family: Manrope, sans-serif; font-size: 23px; font-weight: 800; letter-spacing: -.6px; line-height: 1.25; }
+.quick-calc {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.quick-calc:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
+.quick-calc input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: Manrope, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+.quick-calc input::placeholder { color: var(--muted-2); font-weight: 600; }
+.quick-calc output { min-height: 18px; color: var(--accent-strong); font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+.quick-calc output.error { color: var(--muted); font-weight: 500; }
+.quick-calc output:empty { display: none; }
+
+.home-title { margin: 0 0 12px 2px; font-family: Manrope, sans-serif; font-size: 16px; font-weight: 800; letter-spacing: -.3px; }
+.home-title-row { display: flex; align-items: baseline; justify-content: space-between; margin-top: 22px; }
+.home-title-row .text-button { font-size: 13px; }
+
+.tool-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tool-tile {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px 12px 13px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: transform .15s var(--ease-spring), border-color .2s;
+}
+.tool-tile:active { transform: scale(.95); }
+.tool-tile:hover { border-color: color-mix(in srgb, var(--tile) 45%, transparent); }
+.tile-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 10px;
+  place-items: center;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--tile) 18%, transparent);
+  color: var(--tile);
+}
+.tile-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tool-tile strong { font-family: Manrope, sans-serif; font-size: 14.5px; font-weight: 800; }
+.tool-tile small { max-width: 100%; overflow: hidden; color: var(--muted); font-size: 11.5px; text-overflow: ellipsis; white-space: nowrap; }
+
+.practice-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 15px 16px;
+  border: 0;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #8b5cf6, #4c72ee);
+  box-shadow: 0 10px 24px rgba(99, 102, 241, .25);
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: transform .15s var(--ease-spring);
+}
+.practice-cta:active { transform: scale(.97); }
+.cta-icon { display: grid; flex: none; width: 44px; height: 44px; place-items: center; border-radius: 14px; background: rgba(255, 255, 255, .18); font-size: 20px; }
+.cta-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
+.cta-text strong { font-family: Manrope, sans-serif; font-size: 16px; font-weight: 800; }
+.cta-text small { opacity: .88; font-size: 12.5px; }
+.cta-arrow { font-size: 28px; line-height: 1; opacity: .8; }
+
+.home-history { padding: 4px 0; }
+.home-history-item {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.home-history-item:last-child { border-bottom: 0; }
+.home-history-item:active { background: var(--surface-2); }
+.home-history-item span { overflow: hidden; color: var(--muted); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.home-history-item strong { overflow: hidden; font-family: Manrope, sans-serif; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.home-empty { margin: 0; padding: 18px 16px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+/* Sozlamalar */
+.settings-group { margin-bottom: 20px; }
+.settings-group h3 { margin: 4px 0 8px 6px; color: var(--accent-strong); font-size: 12.5px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; }
+.settings-card { overflow: hidden; padding: 0; }
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+.settings-row:last-child { border-bottom: 0; }
+.settings-row:active { background: var(--surface-2); }
+.settings-row.column { display: grid; gap: 14px; cursor: default; }
+.settings-row.column:active, .about-row:active { background: transparent; }
+.settings-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
+.settings-text strong { font-size: 15px; font-weight: 600; }
+.settings-text small { color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+.settings-row.danger strong { color: var(--danger); }
+.settings-chevron { color: var(--muted-2); font-size: 24px; line-height: 1; }
+.about-row { cursor: default; }
+.about-row img { flex: none; border-radius: 14px; }
+
+/* Almashtirgich (switch) */
+.switch {
+  position: relative;
+  flex: none;
+  width: 50px;
+  height: 30px;
+  margin: 0;
+  border-radius: 15px;
+  background: var(--border-strong);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background .2s;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+  transition: transform .25s var(--ease-spring);
+}
+.switch:checked { background: var(--accent); }
+.switch:checked::after { transform: translateX(20px); }
+
+/* Pastki oyna: tarix va tasdiqlash */
+.sheet-header { display: flex; align-items: center; justify-content: space-between; margin: 0 6px 6px; }
+.sheet-header h3 { margin: 0; font-family: Manrope, sans-serif; font-size: 17px; }
+.sheet-header .text-button { font-size: 13px; }
+.sheet-history { max-height: 60vh; overflow-y: auto; }
+.sheet-history .history-entry { padding: 12px 8px; }
+.sheet-history .history-expression { font-size: 13px; }
+.sheet-history .history-answer { font-size: 16px; }
+.confirm-sheet { padding: 4px 6px 2px; }
+.confirm-sheet h3 { margin: 0 0 6px; font-family: Manrope, sans-serif; font-size: 18px; }
+.confirm-sheet p { margin: 0 0 18px; color: var(--muted); font-size: 13.5px; }
+.confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.primary-button.danger { background: var(--danger); }
+:root[data-scheme="dark"] .primary-button.danger { color: #2a0d12; }
+
+/* Kalkulyator ilovada: butun ekran, tugmalar pastda */
+.app-mode .right-column { display: none; }
+.app-mode .calc-layout { display: block; }
+.app-mode .calculator-card {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 58px - 70px - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  padding: 4px 0 8px;
+}
+.app-mode .calc-screen { flex: 1 1 auto; min-height: 120px; margin-bottom: 12px; }
+.app-mode .calc-actions { margin-bottom: 10px; }
+.app-mode .calc-actions-right { gap: 8px; }

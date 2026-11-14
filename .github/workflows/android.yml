@@ -31,7 +31,7 @@ jobs:
       - name: Sayt fayllarini ilovaga nusxalash
         run: |
           mkdir -p android/app/src/main/assets/www
-          cp -r index.html style.css app.js math-core.js avatar.svg avatar.png icon-192.png manifest.webmanifest fonts android/app/src/main/assets/www/
+          cp -r index.html style.css app.js app-shell.js math-core.js avatar.svg avatar.png icon-192.png manifest.webmanifest fonts android/app/src/main/assets/www/
 
       - name: Imzo kalitini tiklash
         env:

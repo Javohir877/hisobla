@@ -3,6 +3,8 @@
 const M = MathCore;
 
 const pageInfo = {
+  home: ["Hisobla", "Barcha hisob-kitoblar bir joyda."],
+  settings: ["Sozlamalar", "Ilovani o'zingizga moslang."],
   calculator: ["Kalkulyator", "Kundalik va murakkab hisob-kitoblar uchun. Kasrlar aniq hisoblanadi."],
   fractions: ["Kasrlar", "Oddiy kasrlar ustida amallar — bosqichma-bosqich tushuntirish bilan."],
   converter: ["Konvertor", "Uzunlik, og'irlik, harorat va boshqa birliklarni o'tkazing."],
@@ -16,10 +18,15 @@ const toast = document.getElementById("toast");
 const historyKey = "hisobla-calculation-history";
 const themeKey = "hisobla-theme";
 const pageKey = "hisobla-page";
-let activePage = readStorage(pageKey) in pageInfo ? readStorage(pageKey) : "calculator";
-let scientificMode = false;
-let degreesMode = true;
-let showFractionFirst = false;
+const settingsKey = "hisobla-settings";
+const practiceKey = "hisobla-practice";
+const IS_APP = document.documentElement.classList.contains("app-mode");
+const DEFAULT_PAGE = IS_APP ? "home" : "calculator";
+const settings = loadJSON(settingsKey, { degrees: true, fractionFirst: false, scientific: false, haptics: true });
+let activePage = IS_APP ? "home" : (readStorage(pageKey) in pageInfo ? readStorage(pageKey) : "calculator");
+let scientificMode = Boolean(settings.scientific);
+let degreesMode = settings.degrees !== false;
+let showFractionFirst = Boolean(settings.fractionFirst);
 let currentExpression = "";
 let justEvaluated = null; // = bosilgandan keyingi holat: { expression, value }
 let fractionTab = "ops";
@@ -34,6 +41,23 @@ function readStorage(key) {
 }
 function writeStorage(key, value) {
   try { localStorage.setItem(key, value); return true; } catch { return false; }
+}
+
+function loadJSON(key, fallback) {
+  try {
+    const value = JSON.parse(readStorage(key) || "null");
+    return value && typeof value === "object" ? { ...fallback, ...value } : { ...fallback };
+  } catch {
+    return { ...fallback };
+  }
+}
+
+/* Sozlamalarni saqlash: gradus, kasr ko'rinishi, ilmiy rejim, tebranish */
+function saveSettings() {
+  settings.degrees = degreesMode;
+  settings.fractionFirst = showFractionFirst;
+  settings.scientific = scientificMode;
+  writeStorage(settingsKey, JSON.stringify(settings));
 }
 
 function showToast(message) {
@@ -162,10 +186,19 @@ function switchTheme(choice, originEl) {
 
 let themePicker = null, themeBackdrop = null;
 
+function themeOptionsHtml() {
+  const option = (key, name, swatch) =>
+    `<button type="button" class="theme-option" role="radio" data-theme-choice="${key}">${swatch}<span>${name}</span></button>`;
+  return `<div class="theme-grid" role="radiogroup" aria-label="Rang mavzusi">
+    ${option("auto", "Avtomatik", '<span class="theme-swatch auto"></span>')}
+    ${Object.entries(THEMES).map(([key, [name, , bg, surface, accent]]) =>
+      option(key, name, `<span class="theme-swatch" style="--sw-bg:${bg};--sw-surface:${surface};--sw-accent:${accent}"></span>`)).join("")}
+  </div>`;
+}
+
 function markThemeChoice() {
-  if (!themePicker) return;
   const current = savedTheme();
-  themePicker.querySelectorAll("[data-theme-choice]").forEach(option => {
+  document.querySelectorAll("[data-theme-choice]").forEach(option => {
     const active = option.dataset.themeChoice === current;
     option.classList.toggle("active", active);
     option.setAttribute("aria-checked", String(active));
@@ -180,16 +213,10 @@ function openThemePicker() {
     themePicker.className = "theme-picker";
     themePicker.setAttribute("role", "dialog");
     themePicker.setAttribute("aria-label", "Rang mavzusi");
-    const option = (key, name, swatch) =>
-      `<button type="button" class="theme-option" role="radio" data-theme-choice="${key}">${swatch}<span>${name}</span></button>`;
     themePicker.innerHTML = `
       <h3>Rang mavzusi</h3>
       <p>O'zingizga yoqqan rangni tanlang — eslab qolinadi.</p>
-      <div class="theme-grid" role="radiogroup">
-        ${option("auto", "Avtomatik", '<span class="theme-swatch auto"></span>')}
-        ${Object.entries(THEMES).map(([key, [name, , bg, surface, accent]]) =>
-          option(key, name, `<span class="theme-swatch" style="--sw-bg:${bg};--sw-surface:${surface};--sw-accent:${accent}"></span>`)).join("")}
-      </div>`;
+      ${themeOptionsHtml()}`;
     document.body.append(themeBackdrop, themePicker);
     themeBackdrop.addEventListener("click", closeThemePicker);
     themePicker.addEventListener("click", event => {
@@ -246,11 +273,13 @@ function render() {
     if (selected) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
   });
-  document.querySelector(".tab-btn[data-more]")?.classList.toggle("active", activePage === "bmi" || activePage === "loan");
   document.getElementById("breadcrumb-current").textContent = pageInfo[activePage][0];
   document.getElementById("page-title").textContent = pageInfo[activePage][0];
   document.getElementById("page-description").textContent = pageInfo[activePage][1];
+  if (typeof updateAppChrome === "function") updateAppChrome();
   ({
+    home: renderHome,
+    settings: renderSettings,
     calculator: renderCalculator,
     fractions: renderFractions,
     converter: renderConverter,
@@ -284,6 +313,7 @@ function renderCalculator() {
           </div>
           <div class="calc-actions-right">
             <button type="button" class="chip-button ${showFractionFirst ? "active" : ""}" data-action="toggle-fraction" title="Natijani kasr yoki o'nli ko'rinishda ko'rsatish">a/b ⇄ 0,5</button>
+            <button type="button" class="chip-button app-only" data-action="history" aria-label="Hisoblar tarixi">Tarix</button>
             ${scientificMode ? `<label class="angle-toggle"><input type="checkbox" id="degrees-toggle" ${degreesMode ? "checked" : ""} /> Gradus</label>` : ""}
           </div>
         </div>
@@ -348,6 +378,7 @@ function renderCalculator() {
   expression.addEventListener("keydown", handleExpressionKeydown);
   document.getElementById("degrees-toggle")?.addEventListener("change", event => {
     degreesMode = event.target.checked;
+    saveSettings();
     calculatePreview();
   });
   workspace.querySelector(".calculator-card").addEventListener("click", handleCalculatorClick);
@@ -395,11 +426,15 @@ function handleCalculatorClick(event) {
   const action = button.dataset.action;
   if (action === "basic-mode" || action === "scientific-mode") {
     scientificMode = action === "scientific-mode";
+    saveSettings();
     renderCalculator();
   } else if (action === "toggle-fraction") {
     showFractionFirst = !showFractionFirst;
+    saveSettings();
     button.classList.toggle("active", showFractionFirst);
     calculatePreview();
+  } else if (action === "history") {
+    if (typeof openHistorySheet === "function") openHistorySheet();
   } else if (action === "clear") {
     setExpression("");
     document.getElementById("expression").focus();
@@ -870,7 +905,7 @@ function solveFractionOp(a, b, op) {
 /* ----- Mashq: tasodifiy misollar ----- */
 
 let practice = null;
-let practiceScore = { right: 0, total: 0, streak: 0 };
+let practiceScore = loadJSON(practiceKey, { right: 0, total: 0, streak: 0, best: 0 });
 
 function randInt(min, max) { return min + Math.floor(Math.random() * (max - min + 1)); }
 
@@ -951,6 +986,8 @@ function revealPractice(prefix = "") {
 }
 
 function updatePracticeStats() {
+  practiceScore.best = Math.max(practiceScore.best || 0, practiceScore.streak);
+  writeStorage(practiceKey, JSON.stringify(practiceScore));
   const stats = document.querySelector(".practice-stats");
   if (stats) stats.innerHTML = `<span class="chip">To'g'ri: <b>${practiceScore.right}</b> / ${practiceScore.total}</span><span class="chip">Ketma-ket: <b>${practiceScore.streak}</b> 🔥</span>`;
 }
@@ -1442,11 +1479,12 @@ function calculateLoan() {
 /* Bo'limlar manzil orqali: #fractions, #converter ... — "Orqaga" tugmasi ishlaydi */
 function pageFromHash() {
   const page = location.hash.slice(1);
+  if (page === "practice") { fractionTab = "practice"; return "fractions"; }
   return page in pageInfo ? page : null;
 }
 
 function showPage(page) {
-  if (!(page in pageInfo)) page = "calculator";
+  if (!(page in pageInfo)) page = DEFAULT_PAGE;
   closeSheet();
   if (page === activePage && workspace.childElementCount) return;
   activePage = page;
@@ -1461,48 +1499,20 @@ function navigate(page) {
   showPage(page);
 }
 
-window.addEventListener("popstate", () => showPage(pageFromHash() || "calculator"));
-
-const sheet = document.getElementById("app-sheet");
-const sheetBackdrop = document.getElementById("app-sheet-backdrop");
-function openSheet() {
-  sheet.hidden = false;
-  sheetBackdrop.hidden = false;
-  void sheet.offsetWidth; // yashirin holatdan chiqqach animatsiya ishlashi uchun
-  setTimeout(() => { sheet.classList.add("open"); sheetBackdrop.classList.add("open"); }, 10);
-}
-function closeSheet() {
-  if (sheet.hidden) return;
-  sheet.classList.remove("open");
-  sheetBackdrop.classList.remove("open");
-  setTimeout(() => { sheet.hidden = true; sheetBackdrop.hidden = true; }, 250);
-}
-sheetBackdrop.addEventListener("click", closeSheet);
-
-document.addEventListener("click", event => {
-  const pageButton = event.target.closest(".tool-nav [data-page], .app-tabbar [data-page], .app-sheet [data-page]");
-  if (pageButton) { navigate(pageButton.dataset.page); return; }
-  if (event.target.closest(".app-tabbar [data-more]")) { sheet.hidden ? openSheet() : closeSheet(); return; }
-  if (event.target.closest('.app-sheet [data-action="theme"]')) {
-    closeSheet();
-    document.getElementById("theme-toggle").click();
-  }
+window.addEventListener("popstate", () => {
+  if (typeof onAppPopState === "function") onAppPopState();
+  showPage(pageFromHash() || DEFAULT_PAGE);
 });
 
-/* Ilova ichida: tugmalar bosilganda yengil tebranish */
-const native = window.HisoblaNative;
-if (native) {
-  document.addEventListener("pointerdown", event => {
-    if (event.target.closest(".key, .op-button, .tab-btn, .frac-tab, .primary-button, .sheet-item, .frac-sign")) {
-      try { native.haptic(); } catch { /* bo'lmasa — jim */ }
-    }
-  }, { passive: true });
-}
+/* Pastki oyna, tebranish va ilova sahifalari — app-shell.js da */
 
 // Boshlang'ich bo'lim: manzildagi yoki oxirgi ochilgani
 {
   const initial = pageFromHash() || activePage;
-  history.replaceState(null, "", `#${initial}`);
+  // Ilovada tarix boshida doim "Asosiy" turadi — "Orqaga" unga qaytaradi
+  if (IS_APP && initial !== "home") history.replaceState(null, "", "#home");
+  if (IS_APP && initial !== "home") history.pushState(null, "", `#${initial}`);
+  else history.replaceState(null, "", `#${initial}`);
   activePage = initial;
 }
 
@@ -1602,4 +1612,4 @@ document.addEventListener("keydown", event => {
   }
 });
 
-render();
+// Dastlabki chizish app-shell.js oxirida (u keyin yuklanadi)
