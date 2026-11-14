@@ -9,11 +9,12 @@ import ThemeGrid from "./components/ThemeGrid.jsx";
 import UpdateNotice from "./components/UpdateNotice.jsx";
 import Calculator, { HistoryList } from "./pages/Calculator.jsx";
 import Fractions from "./pages/Fractions.jsx";
+import Roots from "./pages/Roots.jsx";
 import { Converter, Percent, Bmi, Loan } from "./pages/Tools.jsx";
 import Home from "./pages/Home.jsx";
 import Settings from "./pages/Settings.jsx";
 
-const PAGE_COMPONENTS = { home: Home, calculator: Calculator, fractions: Fractions, converter: Converter, percent: Percent, bmi: Bmi, loan: Loan, settings: Settings };
+const PAGE_COMPONENTS = { home: Home, calculator: Calculator, fractions: Fractions, roots: Roots, converter: Converter, percent: Percent, bmi: Bmi, loan: Loan, settings: Settings };
 const DEFAULT_PAGE = IS_APP ? "home" : "calculator";
 const DEFAULT_SETTINGS = { degrees: true, fractionFirst: false, scientific: false, haptics: true };
 

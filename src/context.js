@@ -15,6 +15,7 @@ export const PAGES = {
   home: { title: "Hisobla", desc: "Barcha hisob-kitoblar bir joyda." },
   calculator: { title: "Kalkulyator", desc: "Kundalik va murakkab hisob-kitoblar uchun. Kasrlar aniq hisoblanadi." },
   fractions: { title: "Kasrlar", desc: "Oddiy kasrlar ustida amallar — bosqichma-bosqich tushuntirish bilan." },
+  roots: { title: "Ildizlar", desc: "Ildizlarni soddalashtirish, qo'shish, ko'paytirish va maxrajni ildizdan qutqarish — qadam-baqadam." },
   converter: { title: "Konvertor", desc: "Uzunlik, og'irlik, harorat va boshqa birliklarni o'tkazing." },
   percent: { title: "Foiz kalkulyatori", desc: "Foizni hisoblang yoki qiymatdagi o'zgarishni toping." },
   bmi: { title: "Tana massasi (BMI)", desc: "Bo'yingiz va vazningizga qarab tana massasi indeksini hisoblang." },

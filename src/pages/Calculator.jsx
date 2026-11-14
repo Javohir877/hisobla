@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import M from "../lib/math-core.js";
 import { useApp, IS_APP } from "../context.js";
+import { exactRadicalForm } from "../lib/radicals.js";
 
 const SCIENTIFIC_KEYS = [
   ["sin(", "sin"], ["cos(", "cos"], ["tan(", "tan"], ["π", "π"],
@@ -19,10 +20,15 @@ const BASIC_KEYS = [
 
 const coarsePointer = window.matchMedia?.("(pointer: coarse)").matches;
 
-/* Natija: asosiy ko'rinish va qo'shimcha qator (kasr yoki o'nli) */
-function resultParts(value, fractionFirst) {
+/* Natija: asosiy ko'rinish va qo'shimcha qator (kasr, aniq ildiz yoki o'nli) */
+function resultParts(value, fractionFirst, expression = "") {
   const fraction = M.fractionText(value);
   const decimal = M.formatValue(value);
+  if (!value.exact) {
+    // √8 + √18 → 7,07… va aniq ko'rinishi "5√2"
+    const exact = /√|∛|sqrt|cbrt/i.test(expression) ? exactRadicalForm(expression) : null;
+    return { main: decimal, alt: exact ? `Aniq: ${exact}` : "" };
+  }
   if (!fraction || value.d >= 10n ** 12n || M.bAbs(value.n) >= 10n ** 15n) return { main: decimal, alt: "" };
   const repeating = M.formatRepeating(value.n, value.d);
   const periodic = repeating.includes("(");
@@ -46,7 +52,7 @@ export default function Calculator() {
   const preview = useMemo(() => {
     if (!expression.trim()) return { main: "0", alt: "" };
     try {
-      return resultParts(M.evaluate(expression, degrees), fractionFirst);
+      return resultParts(M.evaluate(expression, degrees), fractionFirst, expression);
     } catch (e) {
       return { main: "…", alt: e.isMath && !/tugallanmagan|argumenti yo'q/.test(e.message) ? e.message : "", pending: true };
     }
@@ -91,9 +97,10 @@ export default function Calculator() {
     if (!expression.trim()) return;
     try {
       const value = M.evaluate(expression, degrees);
-      const parts = resultParts(value, fractionFirst);
+      const parts = resultParts(value, fractionFirst, expression);
       const fraction = M.fractionText(value);
-      const answer = parts.main + (fraction && !fractionFirst && parts.alt ? `  (${fraction.improper})` : "");
+      const exactNote = parts.alt.startsWith("Aniq: ") ? `  (${parts.alt.slice(6)})` : "";
+      const answer = parts.main + (fraction && !fractionFirst && parts.alt ? `  (${fraction.improper})` : exactNote);
       if (history[0]?.expression !== expression) setHistory([{ expression, answer }, ...history].slice(0, 30));
       setLastResult({ expression, value });
       setError(null);
@@ -136,7 +143,7 @@ export default function Calculator() {
     }
   };
 
-  const shown = error ? { main: error, alt: "" } : lastResult ? resultParts(lastResult.value, fractionFirst) : preview;
+  const shown = error ? { main: error, alt: "" } : lastResult ? resultParts(lastResult.value, fractionFirst, lastResult.expression) : preview;
   const copy = () => {
     if (error || !navigator.clipboard) return;
     navigator.clipboard.writeText(shown.main.replace(/[\s  ]/g, "")).then(() => toast("Natija nusxalandi."), () => {});

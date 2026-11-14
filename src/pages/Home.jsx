@@ -7,6 +7,7 @@ import { Icon } from "../components/Layout.jsx";
 const TOOLS = [
   ["calculator", "Kalkulyator", "Oddiy va ilmiy", "#4c72ee"],
   ["fractions", "Kasrlar", "Yechim bilan", "#8b5cf6"],
+  ["roots", "Ildizlar", "√ aniq javob", "#6366f1"],
   ["converter", "Konvertor", "8 xil birlik", "#0ea5c6"],
   ["percent", "Foiz", "4 xil hisob", "#f59e0b"],
   ["bmi", "BMI", "Tana massasi", "#ec4899"],

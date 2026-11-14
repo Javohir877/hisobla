@@ -28,7 +28,7 @@ export default function Fractions() {
 }
 
 /* Umumiy qobiq: karta, natija paneli va yechim qadamlari */
-function Shell({ title, label, intro, children, hint, result, steps, resultRef, glow }) {
+export function Shell({ title, label, intro, children, hint, result, steps, resultRef, glow }) {
   return (
     <>
       <section className="card tool-card">

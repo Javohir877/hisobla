@@ -10,6 +10,7 @@ export const ICONS = {
   home: <path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1v-8.5Z" />,
   calculator: <><rect x="5" y="3" width="14" height="18" rx="3" /><path d="M8.5 7.5h7M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01" /></>,
   fractions: <path d="M5 12h14M12 4.5v4M10 6.5h4M10 17.5h4" />,
+  roots: <path d="M3 13.5h3l3.5 6.5L15 4h6" />,
   converter: <path d="M5 8h13l-3.5-3.5M19 16H6l3.5 3.5" />,
   percent: <><path d="M18 6 6 18" /><circle cx="7.5" cy="7.5" r="2.5" /><circle cx="16.5" cy="16.5" r="2.5" /></>,
   bmi: <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />,
@@ -19,7 +20,7 @@ export const ICONS = {
 export const Icon = ({ name, size }) => <Svg size={size}>{ICONS[name]}</Svg>;
 
 /* ---------- Sayt: yon menyu ---------- */
-const SITE_NAV = ["calculator", "fractions", "converter", "percent", "bmi", "loan"];
+const SITE_NAV = ["calculator", "fractions", "roots", "converter", "percent", "bmi", "loan"];
 
 export function Sidebar() {
   const { page, navigate } = useApp();
@@ -101,7 +102,7 @@ export function Topbar() {
 }
 
 /* ---------- Ilova: pastki tablar ---------- */
-const TABS = [["home", "Asosiy"], ["calculator", "Hisob"], ["fractions", "Kasrlar"], ["settings", "Sozlamalar"]];
+const TABS = [["home", "Asosiy"], ["calculator", "Hisob"], ["fractions", "Kasrlar"], ["roots", "Ildizlar"], ["settings", "Sozlamalar"]];
 
 export function TabBar() {
   const { page, navigate } = useApp();
