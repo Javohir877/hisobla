@@ -3,6 +3,7 @@ import M from "../lib/math-core.js";
 import { useApp } from "../context.js";
 import FractionInput from "../components/FractionInput.jsx";
 import { burstConfetti } from "../lib/confetti.js";
+import { playSound } from "../lib/sounds.js";
 import {
   EMPTY_FRACTION, Frac, Mixed, Typed, Steps, ResultBlock, OP_SYMBOL,
   parseFraction, makeFraction, solveFractionOp, simplifySolution, decimalToFraction, fractionToDecimal, compareFractions
@@ -226,13 +227,15 @@ function Practice() {
     if (correct && M.bGcd(f.n, f.d) === 1n) {
       record(true);
       setFeedback({ kind: "good" });
-      setTimeout(() => burstConfetti(resultRef.current), 30);
+      playSound("success");
+    setTimeout(() => burstConfetti(resultRef.current), 30);
     } else if (correct) {
       setFeedback({ kind: "almost", text: `Deyarli! Qiymat to'g'ri, lekin kasrni oxirigacha qisqartiring: EKUB(${M.bAbs(f.n)}, ${f.d}) = ${M.bGcd(f.n, f.d)}.` });
     } else {
       record(false);
       setFeedback({ kind: "bad", given: f });
       setShake(k => k + 1);
+      playSound("error");
     }
   };
 

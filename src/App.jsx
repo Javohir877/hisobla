@@ -12,11 +12,12 @@ import Fractions from "./pages/Fractions.jsx";
 import Roots from "./pages/Roots.jsx";
 import { Converter, Percent, Bmi, Loan } from "./pages/Tools.jsx";
 import Home from "./pages/Home.jsx";
+import { configureSound, playSound, soundForElement } from "./lib/sounds.js";
 import Settings from "./pages/Settings.jsx";
 
 const PAGE_COMPONENTS = { home: Home, calculator: Calculator, fractions: Fractions, roots: Roots, converter: Converter, percent: Percent, bmi: Bmi, loan: Loan, settings: Settings };
 const DEFAULT_PAGE = IS_APP ? "home" : "calculator";
-const DEFAULT_SETTINGS = { degrees: true, fractionFirst: false, scientific: false, haptics: true };
+const DEFAULT_SETTINGS = { degrees: true, fractionFirst: false, scientific: false, haptics: true, sound: true, soundPack: "deep", soundVolume: 0.7 };
 
 /* Manzildan bo'lim: #fractions, #practice (= kasrlar mashqi) */
 function fromHash() {
@@ -117,6 +118,19 @@ export default function App() {
     document.addEventListener("pointerdown", onDown, { passive: true });
     return () => document.removeEventListener("pointerdown", onDown);
   }, [settings.haptics]);
+
+  /* ---------- Tugma ovozlari (ASMR) ---------- */
+  useEffect(() => { configureSound(settings); }, [settings]);
+  useEffect(() => {
+    if (settings.sound === false) return;
+    const onDown = event => {
+      if (event.button > 0) return;
+      const s = soundForElement(event.target);
+      if (s) playSound(...s);
+    };
+    document.addEventListener("pointerdown", onDown, { passive: true });
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [settings.sound]);
 
   /* ---------- Yangilanish: ilova ochilganda tekshiramiz ---------- */
   const checkUpdate = useCallback(async (manual = false) => {

@@ -1,5 +1,6 @@
 import { useApp, NATIVE, APP_VERSION, SITE_URL } from "../context.js";
 import ThemeGrid from "../components/ThemeGrid.jsx";
+import { SOUND_PACKS, configureSound, playSound } from "../lib/sounds.js";
 
 function Switch({ title, hint, checked, onChange }) {
   return (
@@ -21,6 +22,17 @@ function Row({ title, hint, onClick, danger }) {
 
 export default function Settings() {
   const { settings, updateSettings, history, setHistory, practiceScore, setPracticeScore, confirm, toast, checkUpdate } = useApp();
+
+  const soundOn = settings.sound !== false;
+  const pack = settings.soundPack || "deep";
+  const volume = settings.soundVolume ?? 0.7;
+  /* Tanlangan ovozni darhol eshittiramiz: avval raqam, keyin "=" */
+  const preview = patch => {
+    updateSettings(patch);
+    configureSound({ ...settings, ...patch });
+    [3, 5, 8].forEach((d, i) => setTimeout(() => playSound("digit", d), i * 120));
+    setTimeout(() => playSound("equals"), 420);
+  };
 
   const share = () => {
     const data = { title: "Hisobla", text: "Kasrlarni bosqichma-bosqich yechadigan kalkulyator:", url: SITE_URL };
@@ -47,6 +59,36 @@ export default function Settings() {
           <Switch title="Burchak — gradusda" hint="O'chirilsa, radian ishlatiladi" checked={settings.degrees} onChange={v => updateSettings({ degrees: v })} />
           <Switch title="Natija avval kasrda" hint="Masalan 0,5 o'rniga 1/2" checked={settings.fractionFirst} onChange={v => updateSettings({ fractionFirst: v })} />
           {NATIVE && <Switch title="Tugmalarda tebranish" hint="Bosilganda yengil titraydi" checked={settings.haptics} onChange={v => updateSettings({ haptics: v })} />}
+        </div>
+      </section>
+
+      <section className="settings-group">
+        <h3>Ovoz</h3>
+        <div className="card settings-card">
+          <Switch title="Tugma ovozlari" hint="Bosilganda yoqimli, yumshoq ovoz chiqadi" checked={soundOn} onChange={v => updateSettings({ sound: v })} />
+          {soundOn && (
+            <div className="settings-row column">
+              <span className="settings-text"><strong>Ovoz turi</strong><small>Bosib eshitib ko'ring</small></span>
+              <div className="sound-packs" role="radiogroup" aria-label="Ovoz turi">
+                {SOUND_PACKS.map(([key, name, hint]) => (
+                  <button key={key} type="button" role="radio" aria-checked={pack === key}
+                    className={`sound-pack${pack === key ? " active" : ""}`} onClick={() => preview({ soundPack: key })}>
+                    <span className="sound-wave" aria-hidden="true"><i /><i /><i /><i /></span>
+                    <strong>{name}</strong>
+                    <small>{hint}</small>
+                  </button>
+                ))}
+              </div>
+              <label className="volume-row">
+                <span aria-hidden="true">🔈</span>
+                <input type="range" min="0.1" max="1" step="0.05" value={volume} aria-label="Ovoz balandligi"
+                  style={{ "--fill": `${((volume - 0.1) / 0.9) * 100}%` }}
+                  onChange={event => updateSettings({ soundVolume: Number(event.target.value) })}
+                  onPointerUp={() => playSound("digit", 7)} onKeyUp={() => playSound("digit", 7)} />
+                <span aria-hidden="true">🔊</span>
+              </label>
+            </div>
+          )}
         </div>
       </section>
 

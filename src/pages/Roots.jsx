@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import M from "../lib/math-core.js";
 import { Shell } from "./Fractions.jsx";
 import { burstConfetti } from "../lib/confetti.js";
+import { playSound } from "../lib/sounds.js";
 import {
   evaluateRadical, formatRadical, approx, equal, isRational, termsOf, underRoot, rootSign
 } from "../lib/radicals.js";
@@ -238,6 +239,7 @@ function Practice() {
       record(false);
       setFeedback({ kind: "bad", given: given.value });
       setShake(k => k + 1);
+      playSound("error");
       return;
     }
     // Qiymat to'g'ri — javob oxirigacha soddalashtirilganmi?
@@ -246,6 +248,7 @@ function Practice() {
     if (notSimple) { setFeedback({ kind: "almost" }); return; }
     record(true);
     setFeedback({ kind: "good" });
+    playSound("success");
     setTimeout(() => burstConfetti(resultRef.current), 30);
   };
 

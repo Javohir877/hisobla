@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import M from "../lib/math-core.js";
 import { useApp, IS_APP } from "../context.js";
 import { exactRadicalForm } from "../lib/radicals.js";
+import { configureSound, playSound, soundForKey } from "../lib/sounds.js";
 
 const SCIENTIFIC_KEYS = [
   ["sin(", "sin"], ["cos(", "cos"], ["tan(", "tan"], ["π", "π"],
@@ -104,9 +105,11 @@ export default function Calculator() {
       if (history[0]?.expression !== expression) setHistory([{ expression, answer }, ...history].slice(0, 30));
       setLastResult({ expression, value });
       setError(null);
+      playSound("equals");
       setPopKey(k => k + 1);
     } catch (e) {
       setError(e.isMath ? e.message : "Ifodani tekshiring");
+      playSound("error");
       setPopKey(k => k + 1);
     }
   };
@@ -125,9 +128,9 @@ export default function Calculator() {
     const onKey = event => {
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.target.closest?.("input, select, textarea")) return;
-      if (/^[0-9.,+\-*/()%^!:]$/.test(event.key)) { event.preventDefault(); pressRef.current(event.key === ":" ? "/" : event.key); }
+      if (/^[0-9.,+\-*/()%^!:]$/.test(event.key)) { event.preventDefault(); playSound(...soundForKey(event.key)); pressRef.current(event.key === ":" ? "/" : event.key); }
       else if (event.key === "Enter" || event.key === "=") { event.preventDefault(); pressRef.current("equals"); }
-      else if (event.key === "Backspace") { event.preventDefault(); pressRef.current("backspace"); }
+      else if (event.key === "Backspace") { event.preventDefault(); playSound("fn"); pressRef.current("backspace"); }
       else if (event.key === "Escape") pressRef.current("clear");
     };
     document.addEventListener("keydown", onKey);
@@ -135,6 +138,8 @@ export default function Calculator() {
   }, []);
 
   const onInputKey = event => {
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey) playSound(...soundForKey(event.key));
+    else if (event.key === "Backspace") playSound("fn");
     if (event.key === "Enter" || event.key === "=") { event.preventDefault(); equals(); }
     else if (event.key === "Escape") { event.preventDefault(); change(""); }
     else if (lastResult && event.key.length === 1 && !event.ctrlKey && !event.metaKey && /[0-9.,+\-*/^%!():]/.test(event.key)) {
@@ -179,6 +184,11 @@ export default function Calculator() {
           <div className="calc-actions-right">
             <button type="button" className={`chip-button${fractionFirst ? " active" : ""}`} title="Natijani kasr yoki o'nli ko'rinishda ko'rsatish"
               onClick={() => updateSettings({ fractionFirst: !fractionFirst })}>a/b ⇄ 0,5</button>
+            <button type="button" className={`chip-button sound-chip${settings.sound !== false ? " active" : ""}`}
+              aria-pressed={settings.sound !== false} title="Tugma ovozlari"
+              onClick={() => { const on = settings.sound === false; updateSettings({ sound: on }); if (on) { configureSound({ ...settings, sound: true }); playSound("equals"); } toast(on ? "Ovoz yoqildi 🔊" : "Ovoz o'chirildi"); }}>
+              {settings.sound !== false ? "🔊" : "🔇"}
+            </button>
             {IS_APP && <button type="button" className="chip-button" onClick={openHistory}>Tarix</button>}
             {scientific && (
               <label className="angle-toggle">
