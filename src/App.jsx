@@ -12,7 +12,7 @@ import Fractions from "./pages/Fractions.jsx";
 import Roots from "./pages/Roots.jsx";
 import { Converter, Percent, Bmi, Loan } from "./pages/Tools.jsx";
 import Home from "./pages/Home.jsx";
-import { configureSound, playSound, soundForElement } from "./lib/sounds.js";
+import { configureSound, playSound, soundForElement, soundForKey } from "./lib/sounds.js";
 import Settings from "./pages/Settings.jsx";
 
 const PAGE_COMPONENTS = { home: Home, calculator: Calculator, fractions: Fractions, roots: Roots, converter: Converter, percent: Percent, bmi: Bmi, loan: Loan, settings: Settings };
@@ -119,17 +119,39 @@ export default function App() {
     return () => document.removeEventListener("pointerdown", onDown);
   }, [settings.haptics]);
 
-  /* ---------- Tugma ovozlari (ASMR) ---------- */
+  /* ---------- Mexanik klaviatura ovozlari: bosilganda "tok", qo'yib yuborilganda "chiq" ---------- */
   useEffect(() => { configureSound(settings); }, [settings]);
   useEffect(() => {
     if (settings.sound === false) return;
+    let held = null;
     const onDown = event => {
       if (event.button > 0) return;
-      const s = soundForElement(event.target);
-      if (s) playSound(...s);
+      held = soundForElement(event.target);
+      if (held) playSound("down", held);
+    };
+    const onUp = () => { if (held) playSound("up", held); held = null; };
+    const pressed = new Set();
+    const onKeyDown = event => {
+      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.key.length > 1 && !/^(Enter|Backspace|Delete|Tab)$/.test(event.key)) return;
+      pressed.add(event.code);
+      playSound("down", soundForKey(event.key));
+    };
+    const onKeyUp = event => {
+      if (!pressed.delete(event.code)) return;
+      playSound("up", soundForKey(event.key));
     };
     document.addEventListener("pointerdown", onDown, { passive: true });
-    return () => document.removeEventListener("pointerdown", onDown);
+    document.addEventListener("pointerup", onUp, { passive: true });
+    document.addEventListener("pointercancel", onUp, { passive: true });
+    document.addEventListener("keydown", onKeyDown, true);
+    document.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
+      document.removeEventListener("keydown", onKeyDown, true);
+      document.removeEventListener("keyup", onKeyUp, true);
+    };
   }, [settings.sound]);
 
   /* ---------- Yangilanish: ilova ochilganda tekshiramiz ---------- */

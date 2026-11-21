@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import M from "../lib/math-core.js";
-import { useApp, IS_APP } from "../context.js";
+import { useApp, IS_APP, NATIVE } from "../context.js";
 import { exactRadicalForm } from "../lib/radicals.js";
-import { configureSound, playSound, soundForKey } from "../lib/sounds.js";
+import { configureSound, playSound } from "../lib/sounds.js";
 
 const SCIENTIFIC_KEYS = [
   ["sin(", "sin"], ["cos(", "cos"], ["tan(", "tan"], ["π", "π"],
@@ -105,7 +105,6 @@ export default function Calculator() {
       if (history[0]?.expression !== expression) setHistory([{ expression, answer }, ...history].slice(0, 30));
       setLastResult({ expression, value });
       setError(null);
-      playSound("equals");
       setPopKey(k => k + 1);
     } catch (e) {
       setError(e.isMath ? e.message : "Ifodani tekshiring");
@@ -128,18 +127,33 @@ export default function Calculator() {
     const onKey = event => {
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.target.closest?.("input, select, textarea")) return;
-      if (/^[0-9.,+\-*/()%^!:]$/.test(event.key)) { event.preventDefault(); playSound(...soundForKey(event.key)); pressRef.current(event.key === ":" ? "/" : event.key); }
+      if (/^[0-9.,+\-*/()%^!:]$/.test(event.key)) { event.preventDefault(); pressRef.current(event.key === ":" ? "/" : event.key); }
       else if (event.key === "Enter" || event.key === "=") { event.preventDefault(); pressRef.current("equals"); }
-      else if (event.key === "Backspace") { event.preventDefault(); playSound("fn"); pressRef.current("backspace"); }
+      else if (event.key === "Backspace") { event.preventDefault(); pressRef.current("backspace"); }
       else if (event.key === "Escape") pressRef.current("clear");
     };
+    /* Fizik klaviaturada bosilgan tugma ekranda ham "botadi" */
+    const KEY_MAP = { Enter: "equals", "=": "equals", Backspace: "backspace", Escape: "clear", ":": "/", ".": ",", "^": "^" };
+    const keyEl = event => {
+      const k = KEY_MAP[event.key] ?? event.key;
+      return /^[\w+\-*/(),%^!.]+$/.test(k) ? document.querySelector(`.keypad .key[data-k="${k}"]`) : null;
+    };
+    const onDown = event => keyEl(event)?.classList.add("pressed");
+    const onUp = event => keyEl(event)?.classList.remove("pressed");
+    const clear = () => document.querySelectorAll(".keypad .key.pressed").forEach(el => el.classList.remove("pressed"));
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener("keydown", onDown);
+    document.addEventListener("keyup", onUp);
+    window.addEventListener("blur", clear);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", onDown);
+      document.removeEventListener("keyup", onUp);
+      window.removeEventListener("blur", clear);
+    };
   }, []);
 
   const onInputKey = event => {
-    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey) playSound(...soundForKey(event.key));
-    else if (event.key === "Backspace") playSound("fn");
     if (event.key === "Enter" || event.key === "=") { event.preventDefault(); equals(); }
     else if (event.key === "Escape") { event.preventDefault(); change(""); }
     else if (lastResult && event.key.length === 1 && !event.ctrlKey && !event.metaKey && /[0-9.,+\-*/^%!():]/.test(event.key)) {
@@ -154,9 +168,22 @@ export default function Calculator() {
     navigator.clipboard.writeText(shown.main.replace(/[\s  ]/g, "")).then(() => toast("Natija nusxalandi."), () => {});
   };
 
-  const key = (k, label, kind = "", aria) => (
-    <button key={k} type="button" className={`key ${kind}`} aria-label={aria} onClick={() => press(k)}>{label}</button>
-  );
+  /* ⌫ ni bosib turish — hammasini o'chiradi */
+  const holdRef = useRef({ timer: 0, fired: false });
+  const holdStart = () => {
+    holdRef.current.fired = false;
+    clearTimeout(holdRef.current.timer);
+    holdRef.current.timer = setTimeout(() => { holdRef.current.fired = true; change(""); NATIVE?.haptic?.(); }, 550);
+  };
+  const holdEnd = () => clearTimeout(holdRef.current.timer);
+
+  const key = (k, label, kind = "", aria) => {
+    const hold = k === "backspace" ? { onPointerDown: holdStart, onPointerUp: holdEnd, onPointerLeave: holdEnd, onPointerCancel: holdEnd, title: "Bosib tursangiz — hammasi o'chadi" } : null;
+    return (
+      <button key={k} type="button" data-k={k} className={`key ${kind}`} aria-label={aria} {...hold}
+        onClick={() => { if (k === "backspace" && holdRef.current.fired) { holdRef.current.fired = false; return; } press(k); }}>{label}</button>
+    );
+  };
 
   return (
     <div className="calc-layout">
@@ -186,7 +213,7 @@ export default function Calculator() {
               onClick={() => updateSettings({ fractionFirst: !fractionFirst })}>a/b ⇄ 0,5</button>
             <button type="button" className={`chip-button sound-chip${settings.sound !== false ? " active" : ""}`}
               aria-pressed={settings.sound !== false} title="Tugma ovozlari"
-              onClick={() => { const on = settings.sound === false; updateSettings({ sound: on }); if (on) { configureSound({ ...settings, sound: true }); playSound("equals"); } toast(on ? "Ovoz yoqildi 🔊" : "Ovoz o'chirildi"); }}>
+              onClick={() => { const on = settings.sound === false; updateSettings({ sound: on }); if (on) { configureSound({ ...settings, sound: true }); playSound("down", { big: true }); setTimeout(() => playSound("up", { big: true }), 90); } toast(on ? "Ovoz yoqildi 🔊" : "Ovoz o'chirildi"); }}>
               {settings.sound !== false ? "🔊" : "🔇"}
             </button>
             {IS_APP && <button type="button" className="chip-button" onClick={openHistory}>Tarix</button>}

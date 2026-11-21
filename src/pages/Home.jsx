@@ -2,6 +2,7 @@ import { useState } from "react";
 import M from "../lib/math-core.js";
 import { useApp } from "../context.js";
 import { Icon } from "../components/Layout.jsx";
+import { exactRadicalForm } from "../lib/radicals.js";
 
 /* [sahifa, nomi, izoh, rang] */
 const TOOLS = [
@@ -24,6 +25,8 @@ function quickResult(text, degrees) {
   try {
     const value = M.evaluate(text, degrees);
     const fraction = M.fractionText(value);
+    const exact = !value.exact && /√|∛|sqrt|cbrt/i.test(text) ? exactRadicalForm(text) : null;
+    if (exact) return { text: `= ${exact}  ≈ ${M.formatValue(value)}` };
     return { text: `= ${M.formatValue(value)}${fraction && value.d < 10n ** 9n ? `  (${fraction.improper})` : ""}` };
   } catch (e) {
     return { text: e.isMath && !/tugallanmagan/.test(e.message) ? e.message : "…", error: true };

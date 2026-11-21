@@ -40,6 +40,14 @@ export function Sidebar() {
           </button>
         ))}
       </nav>
+      <div className="sidebar-caption">BOSHQA</div>
+      <nav className="tool-nav" aria-label="Sozlamalar">
+        <button type="button" className={`nav-item${page === "settings" ? " active" : ""}`}
+          aria-current={page === "settings" ? "page" : undefined} onClick={() => navigate("settings")}>
+          <span className="nav-icon"><Icon name="settings" /></span>
+          <span>Sozlamalar</span>
+        </button>
+      </nav>
       <div className="sidebar-bottom">
         <div className="sidebar-note">
           <span className="note-icon" aria-hidden="true">✦</span>

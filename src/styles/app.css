@@ -1589,7 +1589,8 @@ h1 {
 
 /* ============ OVOZ ============ */
 .sound-chip { min-width: 34px; font-size: 12px; }
-.sound-packs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sound-packs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .sound-packs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .sound-pack {
   display: grid;
   justify-items: start;
@@ -1634,3 +1635,28 @@ h1 {
 }
 .volume-row input::-moz-range-thumb { width: 22px; height: 22px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 5px rgba(0, 0, 0, .3); }
 @media (max-width: 420px) { .sound-pack { padding: 10px 8px; } .sound-pack small { font-size: 10.5px; } }
+
+/* ============ KLAVIATURA: haqiqiy tugma (keycap) kabi ============ */
+.keypad .key {
+  --edge: color-mix(in srgb, var(--ink) 13%, var(--surface));
+  border-bottom-width: 1px;
+  box-shadow: 0 3px 0 var(--edge), 0 4px 10px rgba(0, 0, 0, .06);
+  transform: translateY(0);
+  transition: transform .07s ease-out, box-shadow .07s ease-out, background .15s, border-color .15s;
+}
+.keypad .key.function { --edge: color-mix(in srgb, var(--ink) 16%, var(--surface-2)); }
+.keypad .key.operator { --edge: color-mix(in srgb, var(--accent) 30%, var(--surface)); }
+.keypad .key.equals { --edge: color-mix(in srgb, var(--accent) 62%, #000); }
+.keypad .key:hover { box-shadow: 0 3px 0 var(--edge), 0 6px 14px color-mix(in srgb, var(--accent) 12%, transparent); }
+.keypad .key:active, .keypad .key.pressed {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--edge), 0 1px 3px rgba(0, 0, 0, .08);
+  transition-duration: .03s;
+}
+.keypad .key.pressed { background: var(--accent-soft); }
+.keypad .key.equals.pressed { background: var(--accent-strong); }
+[data-scheme="dark"] .keypad .key { --edge: color-mix(in srgb, #000 55%, var(--surface)); box-shadow: 0 3px 0 var(--edge), 0 4px 12px rgba(0, 0, 0, .3); }
+[data-scheme="dark"] .keypad .key.operator { --edge: color-mix(in srgb, var(--accent) 22%, #000); }
+[data-scheme="dark"] .keypad .key.equals { --edge: color-mix(in srgb, var(--accent) 50%, #000); }
+.app-mode .keypad { padding-bottom: 3px; }
+@media (prefers-reduced-motion: reduce) { .keypad .key:active, .keypad .key.pressed { transform: none; } }

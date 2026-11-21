@@ -1,6 +1,17 @@
 import { useApp, NATIVE, APP_VERSION, SITE_URL } from "../context.js";
 import ThemeGrid from "../components/ThemeGrid.jsx";
-import { SOUND_PACKS, configureSound, playSound } from "../lib/sounds.js";
+import { SOUND_PACKS, configureSound, playSound, keyFor } from "../lib/sounds.js";
+
+/* Namuna: "12+7=" ni yozayotgandek — tezligi biroz notekis, xuddi odam yozgandek */
+function typeDemo() {
+  let t = 0;
+  for (const ch of "12+7=") {
+    const key = keyFor(ch, ch === "=");
+    t += ch === "=" ? 260 : 110 + Math.random() * 70;
+    setTimeout(() => playSound("down", key), t);
+    setTimeout(() => playSound("up", key), t + 70 + Math.random() * 30);
+  }
+}
 
 function Switch({ title, hint, checked, onChange }) {
   return (
@@ -30,8 +41,7 @@ export default function Settings() {
   const preview = patch => {
     updateSettings(patch);
     configureSound({ ...settings, ...patch });
-    [3, 5, 8].forEach((d, i) => setTimeout(() => playSound("digit", d), i * 120));
-    setTimeout(() => playSound("equals"), 420);
+    typeDemo();
   };
 
   const share = () => {
@@ -65,7 +75,7 @@ export default function Settings() {
       <section className="settings-group">
         <h3>Ovoz</h3>
         <div className="card settings-card">
-          <Switch title="Tugma ovozlari" hint="Bosilganda yoqimli, yumshoq ovoz chiqadi" checked={soundOn} onChange={v => updateSettings({ sound: v })} />
+          <Switch title="Tugma ovozlari" hint="Mexanik klaviatura kabi «tok-tok»" checked={soundOn} onChange={v => updateSettings({ sound: v })} />
           {soundOn && (
             <div className="settings-row column">
               <span className="settings-text"><strong>Ovoz turi</strong><small>Bosib eshitib ko'ring</small></span>
@@ -84,7 +94,7 @@ export default function Settings() {
                 <input type="range" min="0.1" max="1" step="0.05" value={volume} aria-label="Ovoz balandligi"
                   style={{ "--fill": `${((volume - 0.1) / 0.9) * 100}%` }}
                   onChange={event => updateSettings({ soundVolume: Number(event.target.value) })}
-                  onPointerUp={() => playSound("digit", 7)} onKeyUp={() => playSound("digit", 7)} />
+                  onPointerUp={typeDemo} />
                 <span aria-hidden="true">🔊</span>
               </label>
             </div>
