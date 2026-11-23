@@ -4,12 +4,13 @@ import { useApp } from "../context.js";
 import FractionInput from "../components/FractionInput.jsx";
 import { burstConfetti } from "../lib/confetti.js";
 import { playSound } from "../lib/sounds.js";
+import Emoji from "../components/Emoji.jsx";
 import {
   EMPTY_FRACTION, Frac, Mixed, Typed, Steps, ResultBlock, OP_SYMBOL,
   parseFraction, makeFraction, solveFractionOp, simplifySolution, decimalToFraction, fractionToDecimal, compareFractions
 } from "../lib/fractions.jsx";
 
-const TABS = [["ops", "Amallar"], ["simplify", "Qisqartirish"], ["convert", "O'nli ⇄ oddiy"], ["compare", "Taqqoslash"], ["practice", "Mashq ✦"]];
+const TABS = [["ops", "Amallar"], ["simplify", "Qisqartirish"], ["convert", "O'nli ⇄ oddiy"], ["compare", "Taqqoslash"], ["practice", <>Mashq <Emoji name="sparkles" size="1.05em" /></>]];
 
 export default function Fractions() {
   const { fractionTab, setFractionTab } = useApp();
@@ -254,8 +255,8 @@ function Practice() {
   else if (feedback) {
     hint = null;
     result = <>
-      {feedback.kind === "good" && <div className="practice-verdict good">✓ To'g'ri! Barakalla.</div>}
-      {feedback.kind === "bad" && <div className="practice-verdict bad">✗ Noto'g'ri. Siz yozdingiz: <Frac n={feedback.given.n} d={feedback.given.d} />. Quyida to'g'ri yechim:</div>}
+      {feedback.kind === "good" && <div className="practice-verdict good stamp"><Emoji name="check" size="1.3em" /> To'g'ri! Barakalla.</div>}
+      {feedback.kind === "bad" && <div className="practice-verdict bad"><Emoji name="cross" size="1.1em" /> Noto'g'ri. Siz yozdingiz: <Frac n={feedback.given.n} d={feedback.given.d} />. Quyida to'g'ri yechim:</div>}
       <ResultBlock n={solved.sn} d={solved.sd} title={feedback.kind === "good" ? "JAVOB" : "TO'G'RI JAVOB"} />
     </>;
     if (feedback.kind !== "good") steps = solved.steps;
@@ -266,7 +267,7 @@ function Practice() {
       hint={hint} result={result} steps={steps} resultRef={resultRef} glow={feedback?.kind === "good"}>
       <div className="practice-stats">
         <span className="chip">To'g'ri: <b>{score.right}</b> / {score.total}</span>
-        <span className="chip">Ketma-ket: <b>{score.streak}</b> 🔥</span>
+        <span className="chip">Ketma-ket: <b>{score.streak}</b> <Emoji name="fire" anim={score.streak >= 3 ? "flicker" : undefined} /></span>
       </div>
       <div className="practice-task" onKeyDown={event => event.key === "Enter" && event.target.tagName === "INPUT" && check()}>
         <div key={shake} className={`frac-expression practice-expression${shake ? " shake" : ""}`}>

@@ -3,6 +3,7 @@ import M from "../lib/math-core.js";
 import { useApp } from "../context.js";
 import { Icon } from "../components/Layout.jsx";
 import { exactRadicalForm } from "../lib/radicals.js";
+import Emoji from "../components/Emoji.jsx";
 
 /* [sahifa, nomi, izoh, rang] */
 const TOOLS = [
@@ -41,7 +42,7 @@ export default function Home() {
   return (
     <>
       <section className="home-hero">
-        <p className="home-greet">{greeting()} 👋</p>
+        <p className="home-greet">{greeting()} <Emoji name="wave" anim="wave" /></p>
         <h2>Bugun nimani hisoblaymiz?</h2>
         <div className="quick-calc">
           <input type="text" autoComplete="off" spellCheck="false" enterKeyHint="go" aria-label="Tezkor hisob"
@@ -53,8 +54,8 @@ export default function Home() {
 
       <h3 className="home-title">Vositalar</h3>
       <div className="tool-grid">
-        {TOOLS.map(([page, name, hint, color]) => (
-          <button key={page} type="button" className="tool-tile" style={{ "--tile": color }} onClick={() => navigate(page)}>
+        {TOOLS.map(([page, name, hint, color], i) => (
+          <button key={page} type="button" className="tool-tile" style={{ "--tile": color, "--i": i }} onClick={() => navigate(page)}>
             <span className="tile-icon"><Icon name={page} /></span>
             <strong>{name}</strong>
             <small>{hint}</small>
@@ -63,10 +64,10 @@ export default function Home() {
       </div>
 
       <button type="button" className="practice-cta" onClick={() => { setFractionTab("practice"); navigate("fractions"); }}>
-        <span className="cta-icon">✦</span>
+        <span className="cta-icon"><Emoji name="target" size="28px" /></span>
         <span className="cta-text">
           <strong>Kasrlar mashqi</strong>
-          <small>{score.total ? `To'g'ri: ${score.right} / ${score.total} · Eng yaxshi seriya: ${score.best || 0} 🔥` : "Misollar yechib, kasrlarni mustahkamlang"}</small>
+          <small>{score.total ? <>To'g'ri: {score.right} / {score.total} · Eng yaxshi seriya: {score.best || 0} <Emoji name="fire" anim="flicker" /></> : "Misollar yechib, kasrlarni mustahkamlang"}</small>
         </span>
         <span className="cta-arrow" aria-hidden="true">›</span>
       </button>

@@ -7,8 +7,9 @@ import {
   evaluateRadical, formatRadical, approx, equal, isRational, termsOf, underRoot, rootSign
 } from "../lib/radicals.js";
 import { Rad, RadValue, radicalSteps, simplifyExplain } from "../lib/radicals-view.jsx";
+import Emoji from "../components/Emoji.jsx";
 
-const TABS = [["ops", "Amallar"], ["simplify", "Soddalashtirish"], ["compare", "Taqqoslash"], ["practice", "Mashq ✦"]];
+const TABS = [["ops", "Amallar"], ["simplify", "Soddalashtirish"], ["compare", "Taqqoslash"], ["practice", <>Mashq <Emoji name="sparkles" size="1.05em" /></>]];
 
 export default function Roots() {
   const [tab, setTab] = useState("ops");
@@ -265,8 +266,8 @@ function Practice() {
   else if (feedback) {
     hint = null;
     result = <>
-      {feedback.kind === "good" && <div className="practice-verdict good">✓ To'g'ri! Barakalla.</div>}
-      {feedback.kind === "bad" && <div className="practice-verdict bad">✗ Noto'g'ri. Siz yozdingiz: <RadValue v={feedback.given} />. Quyida to'g'ri yechim:</div>}
+      {feedback.kind === "good" && <div className="practice-verdict good stamp"><Emoji name="check" size="1.3em" /> To'g'ri! Barakalla.</div>}
+      {feedback.kind === "bad" && <div className="practice-verdict bad"><Emoji name="cross" size="1.1em" /> Noto'g'ri. Siz yozdingiz: <RadValue v={feedback.given} />. Quyida to'g'ri yechim:</div>}
       <div className="result-label">{feedback.kind === "good" ? "JAVOB" : "TO'G'RI JAVOB"}</div>
       <div className="frac-answer"><RadValue v={expected.value} /></div>
     </>;
@@ -278,7 +279,7 @@ function Practice() {
       hint={hint} result={result} steps={steps} resultRef={resultRef} glow={feedback?.kind === "good"}>
       <div className="practice-stats">
         <span className="chip">To'g'ri: <b>{score.right}</b> / {score.total}</span>
-        <span className="chip">Ketma-ket: <b>{score.streak}</b> 🔥</span>
+        <span className="chip">Ketma-ket: <b>{score.streak}</b> <Emoji name="fire" anim={score.streak >= 3 ? "flicker" : undefined} /></span>
       </div>
       <div className="practice-task" onKeyDown={event => event.key === "Enter" && event.target.tagName === "INPUT" && check()}>
         <div key={shake} className={`frac-expression practice-expression rad-expression${shake ? " shake" : ""}`}>

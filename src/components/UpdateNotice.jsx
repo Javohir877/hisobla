@@ -1,11 +1,12 @@
 import { NATIVE, APP_VERSION } from "../context.js";
+import Emoji from "./Emoji.jsx";
 
 /* "Yangilanish keldi" oynasi ichidagi matn va tugmalar */
 export default function UpdateNotice({ update, onLater, onInstall }) {
   return (
     <div className="update-sheet">
       <div className="update-badge" aria-hidden="true">⤓</div>
-      <h3>Yangilanish keldi! 🎉</h3>
+      <h3>Yangilanish keldi! <Emoji name="party" anim="pop" size="1.25em" /></h3>
       <p className="update-version">
         Yangi versiya <b>{update.version}</b>
         {APP_VERSION && <> · sizda {APP_VERSION}</>}

@@ -3,6 +3,8 @@ import M from "../lib/math-core.js";
 import { useApp, IS_APP, NATIVE } from "../context.js";
 import { exactRadicalForm } from "../lib/radicals.js";
 import { configureSound, playSound } from "../lib/sounds.js";
+import Emoji from "../components/Emoji.jsx";
+import { Speaker } from "../components/Layout.jsx";
 
 const SCIENTIFIC_KEYS = [
   ["sin(", "sin"], ["cos(", "cos"], ["tan(", "tan"], ["π", "π"],
@@ -163,6 +165,8 @@ export default function Calculator() {
   };
 
   const shown = error ? { main: error, alt: "" } : lastResult ? resultParts(lastResult.value, fractionFirst, lastResult.expression) : preview;
+  /* "=" dan keyin: natija odometr kabi aylanib chiqadi; xatoda harflar "qoqiladi" */
+  const resultMotion = !popKey ? null : error ? "deny" : lastResult ? "roll" : null;
   const copy = () => {
     if (error || !navigator.clipboard) return;
     navigator.clipboard.writeText(shown.main.replace(/[\s  ]/g, "")).then(() => toast("Natija nusxalandi."), () => {});
@@ -197,9 +201,11 @@ export default function Calculator() {
             placeholder="Masalan: 1/2 + 1/3" inputMode={coarsePointer ? "none" : undefined}
             value={expression} onChange={event => change(event.target.value, event.target.selectionStart)} onKeyDown={onInputKey} />
           <button type="button" key={popKey}
-            className={`calc-result${error ? " error shake" : popKey && lastResult ? " pop" : ""}${preview.pending && !error && !lastResult ? " pending" : ""}`}
-            style={{ "--len": shown.main.length }} aria-live="polite" title="Nusxa olish uchun bosing" onClick={copy}>
-            {shown.main}
+            className={`calc-result${resultMotion ? ` ${resultMotion}` : ""}${error ? " error" : ""}${preview.pending && !error && !lastResult ? " pending" : ""}`}
+            style={{ "--len": shown.main.length }} aria-live="polite" aria-label={shown.main} title="Nusxa olish uchun bosing" onClick={copy}>
+            {resultMotion
+              ? [...shown.main].map((ch, i) => <span key={i} className="ch" style={{ "--i": i }} aria-hidden="true">{ch}</span>)
+              : shown.main}
           </button>
           <div className="calc-alt">{shown.alt}</div>
         </div>
@@ -213,8 +219,8 @@ export default function Calculator() {
               onClick={() => updateSettings({ fractionFirst: !fractionFirst })}>a/b ⇄ 0,5</button>
             <button type="button" className={`chip-button sound-chip${settings.sound !== false ? " active" : ""}`}
               aria-pressed={settings.sound !== false} title="Tugma ovozlari"
-              onClick={() => { const on = settings.sound === false; updateSettings({ sound: on }); if (on) { configureSound({ ...settings, sound: true }); playSound("down", { big: true }); setTimeout(() => playSound("up", { big: true }), 90); } toast(on ? "Ovoz yoqildi 🔊" : "Ovoz o'chirildi"); }}>
-              {settings.sound !== false ? "🔊" : "🔇"}
+              onClick={() => { const on = settings.sound === false; updateSettings({ sound: on }); if (on) { configureSound({ ...settings, sound: true }); playSound("down", { big: true }); setTimeout(() => playSound("up", { big: true }), 90); } toast(on ? "Tugma ovozlari yoqildi" : "Tugma ovozlari o'chirildi"); }}>
+              <Speaker level={settings.sound !== false ? 2 : 0} size={15} />
             </button>
             {IS_APP && <button type="button" className="chip-button" onClick={openHistory}>Tarix</button>}
             {scientific && (
@@ -241,7 +247,7 @@ export default function Calculator() {
             <HistoryList items={history.slice(0, 8)} onPick={expr => change(expr)} />
           </section>
           <section className="card tip-card">
-            <h3>✦ Kasrlar bilan ishlash</h3>
+            <h3><Emoji name="bulb" size="1.2em" /> Kasrlar bilan ishlash</h3>
             <p><strong>1/2 + 1/3</strong> deb yozing — natija <strong>5/6</strong> kasr ko'rinishida ham chiqadi. Aralash son: <strong>2+1/3</strong>. Davriy kasr: <strong>0,(3)</strong>. Bo'lish uchun <strong>:</strong> belgisi ham ishlaydi.</p>
           </section>
         </div>

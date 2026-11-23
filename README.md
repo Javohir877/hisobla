@@ -35,3 +35,7 @@ npm run build   # dist/ — sayt va APK uchun
 ```
 
 GitHub'ga yuklanganda sayt (`pages.yml`) va APK (`android.yml`) avtomatik yig'iladi.
+
+## Litsenziyalar
+
+Emoji rasmlari (`public/emoji/`) — Google [Noto Emoji](https://github.com/googlefonts/noto-emoji), Apache 2.0 litsenziyasi.

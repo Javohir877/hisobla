@@ -174,14 +174,23 @@ function decimalExpansion(n, d, maxDigits = 120) {
 
 /* ---------- Formatlash ---------- */
 
-const numberFormat = new Intl.NumberFormat("uz-UZ", { useGrouping: true });
-const DEC_SEP = (() => {
-  try { return numberFormat.formatToParts(1.5).find(p => p.type === "decimal").value; }
-  catch { return ","; }
-})();
+/* O'zbekcha ko'rinish: 1 234 567,89 — brauzer/telefonda "uz" tili ma'lumoti bo'lmasa ham bir xil chiqadi */
+const DEC_SEP = ",";
+const GROUP_SEP = " ";
 const SUPERSCRIPT = { "-": "⁻", "+": "", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
 
-function groupInt(big) { return numberFormat.format(big); }
+function groupInt(big) {
+  const text = String(big);
+  const sign = text.startsWith("-") ? "-" : "";
+  return sign + text.slice(sign.length).replace(/\B(?=(\d{3})+(?!\d))/g, GROUP_SEP);
+}
+
+/* Oddiy son: en-US bilan aniq raqamlarni olamiz, keyin o'zimiz guruhlaymiz */
+function plainNumber(x, maxFrac) {
+  const text = x.toLocaleString("en-US", { maximumFractionDigits: maxFrac, useGrouping: false });
+  const [int, frac] = text.split(".");
+  return groupInt(int) + (frac ? DEC_SEP + frac : "");
+}
 
 function formatFloat(x, maxFrac = 10) {
   if (!Number.isFinite(x)) return "Natija aniqlanmadi";
@@ -189,10 +198,10 @@ function formatFloat(x, maxFrac = 10) {
   const ax = Math.abs(x);
   if (ax !== 0 && (ax >= 1e21 || ax < 1e-9)) {
     const [mant, exp] = x.toExponential(9).split("e");
-    const m = new Intl.NumberFormat("uz-UZ", { maximumFractionDigits: 9 }).format(Number(mant));
+    const m = plainNumber(Number(mant), 9);
     return `${m} × 10${exp.split("").map(c => SUPERSCRIPT[c]).join("")}`;
   }
-  return new Intl.NumberFormat("uz-UZ", { maximumFractionDigits: maxFrac }).format(x);
+  return plainNumber(x, maxFrac);
 }
 
 function formatExact(n, d, maxFrac = 10) {

@@ -14,6 +14,7 @@ import { Converter, Percent, Bmi, Loan } from "./pages/Tools.jsx";
 import Home from "./pages/Home.jsx";
 import { configureSound, playSound, soundForElement, soundForKey } from "./lib/sounds.js";
 import Settings from "./pages/Settings.jsx";
+import Emoji from "./components/Emoji.jsx";
 
 const PAGE_COMPONENTS = { home: Home, calculator: Calculator, fractions: Fractions, roots: Roots, converter: Converter, percent: Percent, bmi: Bmi, loan: Loan, settings: Settings };
 const DEFAULT_PAGE = IS_APP ? "home" : "calculator";
@@ -227,7 +228,7 @@ export default function App() {
                 <h1>{PAGES[page].title}</h1>
                 <p className="page-description">{PAGES[page].desc}</p>
               </div>
-              <div className="date-chip"><span aria-hidden="true">✳</span> Aniq hisob-kitob</div>
+              <div className="date-chip"><Emoji name="sparkles" size="14px" /> Aniq hisob-kitob</div>
             </section>
           )}
           {/* key — sahifa almashganda kartalar CSS animatsiyasi bilan paydo bo'ladi */}

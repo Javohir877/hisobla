@@ -1,7 +1,7 @@
 /* Hisobla — oflayn ishlash uchun service worker.
    Vite fayl nomlariga xesh qo'shadi (index-AbC123.js), shuning uchun ularni ro'yxatda emas,
    birinchi ochilganda keshga olamiz. Yangi versiya chiqarilganda VERSION ni o'zgartiring. */
-const VERSION = "hisobla-v6";
+const VERSION = "hisobla-v7";
 const CORE = ["./", "index.html", "avatar.svg", "avatar.png", "icon-192.png", "manifest.webmanifest"];
 
 self.addEventListener("install", event => {

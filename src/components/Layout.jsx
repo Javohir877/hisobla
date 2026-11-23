@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useApp, IS_APP, PAGES, SUB_PAGES, APK_URL } from "../context.js";
 import { read, write, KEYS } from "../lib/storage.js";
+import Emoji from "./Emoji.jsx";
 
 /* ---------- Ikonkalar ---------- */
 const Svg = ({ children, size = 22 }) => (
@@ -18,6 +19,18 @@ export const ICONS = {
   settings: <><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="7.2" /><path d="M12 2.8v2.4M12 18.8v2.4M4.2 7.5l2.1 1.2M17.7 15.3l2.1 1.2M4.2 16.5l2.1-1.2M17.7 8.7l2.1-1.2" /></>
 };
 export const Icon = ({ name, size }) => <Svg size={size}>{ICONS[name]}</Svg>;
+
+/* Karnay belgisi: level 0 — o'chiq, 1 — past, 2 — baland */
+export function Speaker({ level = 2, size = 18 }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z" fill="currentColor" fillOpacity=".18" />
+      {level === 0 && <path d="M16 9.5l5 5M21 9.5l-5 5" />}
+      {level >= 1 && <path d="M15.5 9.2a4 4 0 0 1 0 5.6" />}
+      {level >= 2 && <path d="M18.3 6.5a8 8 0 0 1 0 11" />}
+    </svg>
+  );
+}
 
 /* ---------- Sayt: yon menyu ---------- */
 const SITE_NAV = ["calculator", "fractions", "roots", "converter", "percent", "bmi", "loan"];
@@ -50,7 +63,7 @@ export function Sidebar() {
       </nav>
       <div className="sidebar-bottom">
         <div className="sidebar-note">
-          <span className="note-icon" aria-hidden="true">✦</span>
+          <span className="note-icon"><Emoji name="sparkles" anim="twinkle" size="22px" /></span>
           <p>Hisob-kitoblar<br />endi ancha oson.</p>
           <span className="note-spark spark-one" />
           <span className="note-spark spark-two" />
@@ -114,8 +127,10 @@ const TABS = [["home", "Asosiy"], ["calculator", "Hisob"], ["fractions", "Kasrla
 
 export function TabBar() {
   const { page, navigate } = useApp();
+  const index = TABS.findIndex(([key]) => page === key || (key === "home" && SUB_PAGES.includes(page)));
   return (
     <nav className="app-tabbar" aria-label="Bo'limlar">
+      <span className={`tab-pill${index < 0 ? " hidden" : ""}`} style={{ "--i": Math.max(index, 0) }} aria-hidden="true" />
       {TABS.map(([key, label]) => {
         const active = page === key || (key === "home" && SUB_PAGES.includes(page));
         return (

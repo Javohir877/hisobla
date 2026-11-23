@@ -1,6 +1,7 @@
 import { useApp, NATIVE, APP_VERSION, SITE_URL } from "../context.js";
 import ThemeGrid from "../components/ThemeGrid.jsx";
 import { SOUND_PACKS, configureSound, playSound, keyFor } from "../lib/sounds.js";
+import { Speaker } from "../components/Layout.jsx";
 
 /* Namuna: "12+7=" ni yozayotgandek — tezligi biroz notekis, xuddi odam yozgandek */
 function typeDemo() {
@@ -35,7 +36,7 @@ export default function Settings() {
   const { settings, updateSettings, history, setHistory, practiceScore, setPracticeScore, confirm, toast, checkUpdate } = useApp();
 
   const soundOn = settings.sound !== false;
-  const pack = settings.soundPack || "deep";
+  const pack = SOUND_PACKS.some(([key]) => key === settings.soundPack) ? settings.soundPack : "thock";
   const volume = settings.soundVolume ?? 0.7;
   /* Tanlangan ovozni darhol eshittiramiz: avval raqam, keyin "=" */
   const preview = patch => {
@@ -90,12 +91,12 @@ export default function Settings() {
                 ))}
               </div>
               <label className="volume-row">
-                <span aria-hidden="true">🔈</span>
+                <Speaker level={1} />
                 <input type="range" min="0.1" max="1" step="0.05" value={volume} aria-label="Ovoz balandligi"
                   style={{ "--fill": `${((volume - 0.1) / 0.9) * 100}%` }}
                   onChange={event => updateSettings({ soundVolume: Number(event.target.value) })}
                   onPointerUp={typeDemo} />
-                <span aria-hidden="true">🔊</span>
+                <Speaker level={2} />
               </label>
             </div>
           )}
