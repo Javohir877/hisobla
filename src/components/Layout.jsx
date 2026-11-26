@@ -80,20 +80,6 @@ const isApple = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 export function Topbar() {
   const { page, goBack, openThemes } = useApp();
-  const [installPrompt, setInstallPrompt] = useState(null);
-
-  useEffect(() => {
-    const onPrompt = event => { event.preventDefault(); setInstallPrompt(event); };
-    window.addEventListener("beforeinstallprompt", onPrompt);
-    return () => window.removeEventListener("beforeinstallprompt", onPrompt);
-  }, []);
-
-  const install = async () => {
-    installPrompt.prompt();
-    await installPrompt.userChoice.catch(() => {});
-    setInstallPrompt(null);
-  };
-
   return (
     <header className="topbar">
       {IS_APP && SUB_PAGES.includes(page) && (
@@ -106,7 +92,6 @@ export function Topbar() {
       </div>
       <div className="topbar-right">
         <span className="online-indicator"><span /> Bepul va qulay</span>
-        {installPrompt && !isAndroid && <button type="button" className="app-link" onClick={install}>⤓ O'rnatish</button>}
         {!isApple && (
           <a className="app-link" href={APK_URL} rel="noopener">
             <Svg size={15}><path d="M7.5 9.5h9v8.2a1.3 1.3 0 0 1-1.3 1.3H8.8a1.3 1.3 0 0 1-1.3-1.3V9.5ZM7.6 8.3a4.4 4.4 0 0 1 8.8 0H7.6Z" fill="currentColor" /></Svg>
