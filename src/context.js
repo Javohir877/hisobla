@@ -8,7 +8,10 @@ export const useApp = () => useContext(AppContext);
 export const IS_APP = document.documentElement.classList.contains("app-mode");
 export const NATIVE = window.HisoblaNative || null;
 export const APP_VERSION = (navigator.userAgent.match(/HisoblaApp\/([\d.]+)/) || [])[1] || null;
-export const SITE_URL = "https://javohir877.github.io/hisobla/";
+/* Saytning manzili: yangi hostingdagi domen shu yerga yoziladi. Bo'sh bo'lsa — saytda joriy manzil,
+   ilovada esa "Saytni ochish" va "Ulashish" ko'rsatilmaydi. */
+const SITE_DOMAIN = "";
+export const SITE_URL = SITE_DOMAIN || (!IS_APP && /^https?:/.test(location.protocol) ? location.origin + location.pathname.replace(/[^/]*$/, "") : "");
 export const APK_URL = "https://github.com/Javohir877/hisobla/releases/latest/download/hisobla.apk";
 
 export const PAGES = {

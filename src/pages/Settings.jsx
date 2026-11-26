@@ -129,8 +129,8 @@ export default function Settings() {
             </span>
           </div>
           {APP_VERSION && <Row title="Yangilanishni tekshirish" hint="Yangi versiya chiqqanini ko'rish" onClick={() => checkUpdate(true)} />}
-          <Row title="Do'stlarga ulashish" hint="Havolani yuborish" onClick={share} />
-          <Row title="Saytni ochish" hint={SITE_URL.replace("https://", "")} onClick={() => window.open(SITE_URL, "_blank", "noopener")} />
+          {SITE_URL && <Row title="Do'stlarga ulashish" hint="Havolani yuborish" onClick={share} />}
+          {SITE_URL && <Row title="Saytni ochish" hint={SITE_URL.replace(/^https?:\/\//, "")} onClick={() => window.open(SITE_URL, "_blank", "noopener")} />}
         </div>
       </section>
     </>

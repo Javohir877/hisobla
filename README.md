@@ -2,7 +2,7 @@
 
 Ilmiy kalkulyator, **kasrlar bosqichma-bosqich yechim bilan**, o'lchov konvertori, foiz, BMI va kredit kalkulyatorlari.
 
-- 🌐 Sayt: https://javohir877.github.io/hisobla/
+- 🌐 Sayt: o'z hostingida (GitHub Pages o'chirilgan)
 - 📱 Android ilova (APK): https://github.com/Javohir877/hisobla/releases/latest/download/hisobla.apk
   — o'rnatilgandan keyin ilovaning o'zi yangi versiya chiqqanini xabar qiladi va yangilaydi.
 
